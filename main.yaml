@@ -20,7 +20,7 @@ $main:
         * [Dungeons](#toc-dungeons)
     {% for d in dungeons %}
             * [{{d.Name.Title}}](#{{d.uuid}})
-    {% endfor %}
+    {% errorendfor %}
         * [Factions](#toc-factions)
     {% for f in factions %}
             * [The {{f.Name_Prefix|title}} {{f.Name_Suffix|title}}](#{{f.uuid}})
@@ -335,7 +335,7 @@ $main:
     dungeonproxies:
       $rollsome:
         $debug: Generating dungeons
-        $class: DungeonProxyError
+        $class: DungeonProxy
         $min: !parameter minimum_number_of_dungeons
         $max: !parameter maximum_number_of_dungeons
 
