@@ -335,7 +335,7 @@ $main:
     dungeonproxies:
       $rollsome:
         $debug: Generating dungeons
-        $class: DungeonProxy
+        $class: DungeonProxyError
         $min: !parameter minimum_number_of_dungeons
         $max: !parameter maximum_number_of_dungeons
 
