@@ -20,7 +20,7 @@ $main:
         * [Dungeons](#toc-dungeons)
     {% for d in dungeons %}
             * [{{d.Name.Title}}](#{{d.uuid}})
-    {% errorendfor %}
+    {% endfor %}
         * [Factions](#toc-factions)
     {% for f in factions %}
             * [The {{f.Name_Prefix|title}} {{f.Name_Suffix|title}}](#{{f.uuid}})
@@ -32,6 +32,7 @@ $main:
         * [Legal](#toc-legal)
             * [Designation of Open Game Content](#toc-doogc)
             * [OGL](#toc-ogl)
+  Malformed::: m:: :::
 
   Output: !jinja |
     # {{Realm.Title}} <a name="{{uuid}}"></a>
