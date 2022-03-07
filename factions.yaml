@@ -1,0 +1,294 @@
+Faction:
+  $collection: factions
+
+  FullName: !jinja >
+    The {{Name_Prefix|title}} {{Name_Suffix|title}}
+
+  Details: !jinja >
+
+    The {{subclass_}} leader is a {{Leader.Description}}
+
+
+    {%if LeaderSpecialInterest.Details!=''%}{{Leader.Name.First | capitalize}} {{Leader.Gender.Pos}} a special interest 
+    of an unknown nature in {{LeaderSpecialInterest.Details}}.{%endif%}
+
+
+    __{{Leader.Name.Full}}__ (Level {{Leader.Level}} {{Leader.Class}})
+
+
+    ---
+
+
+    <a name="{{Leader.uuid}}"></a>{{Leader.Stats}}
+
+
+    ---
+
+
+    #### Members
+
+    {% for m in Members %}
+
+    * [{{m.Name.Full}}](#{{m.uuid}}) {{m.Profession if m.Profession}}{%if m.CityContext%} from the {{m.CityContext.Title}}{%endif%}
+    {% endfor %}
+
+
+    #### Collaborators
+
+    {% for c in Collaborators %}
+
+    * {{c.Name.Full}} {{c.Profession if c.Profession}}{%if c.CityContext%} from the {{c.CityContext.Title}}{%endif%}
+    {% endfor %}
+
+
+  PurposeRumor:
+    $roll:
+      $class: Rumor
+      $inject:
+        $namespace: faction
+        $values:
+          Details: !jinja >
+            [__{{faction.FullName}}__](#{{faction.uuid}}) are {{faction.Verb}}
+            __{{faction.Purpose}}__.
+
+  Collaborators:
+    $popsome: 
+      $collection: characters
+      $min: 3
+      $max: 5
+      $inject:
+        $namespace: faction
+        $values:
+          Association: !jinja >
+
+            * Collaborates with the [__{{faction.FullName}}__](#{{faction.uuid}}).
+
+  Members:
+    $popsome: 
+      $collection: characters
+      $min: 10
+      $max: 20
+      $inject:
+        $namespace: faction
+        $values:
+          Association: !jinja >
+
+            * Member of the [__{{faction.FullName}}__](#{{faction.uuid}}).
+
+          Alignment: !jinja "{{faction.AcceptedAlignment}}"
+
+  LeaderSpecialInterest:
+    $roll: FactionLeaderInterest
+
+
+  $subclass: !parameter faction_classes
+
+
+Cult:
+  $extends: Faction
+  Header: !jinja |
+    
+    %%end_two_columns_layout_when_printing
+    
+    ### The {{Name_Prefix|title}} {{Name_Suffix|title}} <a name='{{uuid}}'></a> <h3 class="sticky"> The {{Name_Prefix|title}} {{Name_Suffix|title}} </h3>
+
+    %%begin_two_columns_layout_when_printing
+
+    The {{Name_Prefix|title}} {{Name_Suffix|title}} 
+    {{subclass_}} are {{Purpose}}.
+    The {{subclass_}} hideout is the __[{{Lair.Name.Title}}](#{{Lair.HexUUID}})__.
+
+  AcceptedAlignment:
+    - Chaotic
+
+  Name_Prefix: !avoid_duplicates
+    - dark
+    - defiled
+    - white
+    - black
+    - burning
+    - flaming
+    - desecrated
+    - foul
+    - corrupt
+
+  Name_Suffix: !avoid_duplicates
+    - horrors
+    - sun
+    - followers
+    - truthseekers
+    - saviors
+    - scrolls
+    - saints
+    - bones
+    - lambs
+    - wolves
+
+  Race:
+    - humans
+    - elves
+    - gnolls
+    - kobolds
+
+  Verb: secretly 
+
+  Purpose:
+    - conducting horrid experiments in humanoids
+    - sacrificing humans
+    - attempting demons summoning rituals
+
+  Leader:
+    $roll:
+      $class:
+        - Magic-userLevel6
+        - Magic-userLevel7
+        - Magic-userLevel8
+        - Magic-userLevel9
+        - ClericLevel6
+        - ClericLevel7
+        - ClericLevel8
+        - ClericLevel9
+      $inject:
+        $values:
+          Alignment: Chaotic  
+
+  #Lair:
+  #  $pop:
+  #    - temples
+  #    - lairs
+
+  Lair:
+    $popone:
+      $collection:
+        - temples
+        - lairs
+      $inject:
+        $namespace: faction
+        $values:
+          Faction: !jinja >
+            [__{{faction.FullName}}__](#{{faction.uuid}}) are using this dungeon, and theres
+            a 2 in 6 chance to find [__{{faction.Leader.Name.Full}}__](#{{faction.Leader.uuid}})
+            together with {{faction.Leader.Gender.Pronoun2}} acolytes or mediums here.
+            
+
+  LairRumor:
+    $roll:
+      $class: Rumor
+      $inject:
+        $namespace: faction
+        $values:
+          Details: !jinja >
+            __{{faction.FullName}}__ are using the
+            __{{faction.Lair.Name.Title | title}}__ as their hideout.
+
+
+Militia:
+  $extends: Faction
+  Header: !jinja >
+    
+    %%end_two_columns_layout_when_printing
+
+    ### The {{Name_Prefix|title}} {{Name_Suffix|title}}<a name='{{uuid}}'></a> <h3 class="sticky"> The {{Name_Prefix|title}} {{Name_Suffix|title}} </h3>
+
+
+    %%begin_two_columns_layout_when_printing
+
+
+    The {{Name_Prefix|title}} {{Name_Suffix|title}} 
+    {{subclass_}} are {{Verb}} {{Purpose}}.
+    The {{subclass_ | lower}}’s usual gathering venue is __{{Tavern.Name.Full}}__ in
+    {%if Tavern.CityContext%}__{{Tavern.CityContext.NamePart|title}}__{%else%}
+    {{Tavern.RegionValue}}
+    {%endif%}
+
+  AcceptedAlignment:
+    - Chaotic
+    - Neutral
+
+  Name_Prefix:
+    - fists
+    - swords
+    - spears
+    - arrows
+    - hammers
+    - army
+    - defenders
+
+  Name_Suffix:
+    - of hope
+    - of justice
+    - of power
+    - of honor
+    - of victory
+    - of valor
+    - of fire
+    - of revival
+
+  Race:
+    - humans
+    - elves
+    - gnolls
+    - kobolds
+
+  Verb:
+    - conspiring to
+    - plotting to
+
+  Purpose:
+    - overthrow the ruler of the realm
+    - abolish all magic-users
+    - eliminate all cultists
+
+  Tavern:
+    $popone:
+      $collection: taverns
+      $inject:
+        $namespace: faction
+        $values:
+          Faction: !jinja >
+            [__{{faction.FullName}}__](#{{faction.uuid}}) are using this place
+            as a meeting place from time to time.
+
+  Leader:
+    $roll:
+      $class:
+        - FighterLevel6
+        - FighterLevel7
+        - FighterLevel8
+        - FighterLevel9
+        - FighterLevel10
+      $inject:
+        $values:
+          Alignment: Neutral  
+
+
+FactionLeaderInterest:
+  $subclass: !weighted
+    - FactionLeaderHasNoSpecialIterest^2
+    - FactionLeaderNPCInterest
+    - FactionLeaderItemInterest
+
+
+FactionLeaderHasNoSpecialIterest:
+  Details: ''
+
+
+FactionLeaderNPCInterest:
+  Details: !jinja >
+    [__{{NPC.Name.Full}}__](#{{NPC.uuid}})
+
+  NPC:
+    $pickone:
+      $collection: characters
+
+
+FactionLeaderItemInterest:
+  Details: !jinja >
+    {%if LostItem %}
+    [__{{LostItem.FolkContext.Name.Full}}’s__](#{{LostItem.FolkContext.uuid}})
+    __{{LostItem.Appearance}}__
+    {%endif%}
+
+  LostItem:
+    $pickone:
+      $collection: lost_items

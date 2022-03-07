@@ -1,0 +1,1639 @@
+# This document contains Open Game Content, subject to the Open Game License,
+# released un the Open Game License, Version 1.0a (enclosed in the LICENSE
+# file), as described in Section 1(d) of the License.
+
+TreasureType:
+  PiecesFactor: 1.0
+  GoldValue: !jinja >
+    {%set factor = namespace(value = (1 if (not RoomContext or not MaxNumberAppearingRoaming) else MaxNumberAppearingRoaming/NumberAppearingRoaming))%}
+    {%set gptotal = namespace(value = 0) %}
+    {%if cp1000.Roll <= cp1000.Odds%} {%set gptotal.value = gptotal.value + 10*cp1000.Amount*PiecesFactor/factor.value%}{%endif%}
+    {%if sp1000.Roll <= sp1000.Odds%} {%set gptotal.value = gptotal.value + 100*sp1000.Amount*PiecesFactor/factor.value%}{%endif%}
+    {%if ep1000.Roll <= ep1000.Odds%} {%set gptotal.value = gptotal.value + 500*ep1000.Amount*PiecesFactor/factor.value%}{%endif%}
+    {%if gp1000.Roll <= gp1000.Odds%} {%set gptotal.value = gptotal.value + 1000*gp1000.Amount*PiecesFactor/factor.value%}{%endif%}
+    {%if pp1000.Roll <= pp1000.Odds%} {%set gptotal.value = gptotal.value + 5000*pp1000.Amount*PiecesFactor/factor.value%}{%endif%}
+    {{gptotal.value}}
+
+  GemsValue: !jinja >
+    {%set factor = namespace(value = (1 if (not RoomContext or not MaxNumberAppearingRoaming) else MaxNumberAppearingRoaming/NumberAppearingRoaming))%}
+    {%set total = namespace(value = 0) %}
+    {%for g in range(Gems.Amount)%}{%set gemroll = range(1, 20) | random %}
+    {%if gemroll >=1 and gemroll <=4%}{%set total.value = total.value + 10%}{%endif%}
+    {%if gemroll >=5 and gemroll <=9%}{%set total.value = total.value + 50%}{%endif%}
+    {%if gemroll >=10 and gemroll <=15%}{%set total.value = total.value + 100%}{%endif%}
+    {%if gemroll >=16 and gemroll <=19%}{%set total.value = total.value + 500%}{%endif%}
+    {%if gemroll == 20 %}{%set total.value = total.value + 1000%}{%endif%}
+    {%endfor%}
+    {{total.value/factor.value}}
+
+  JewelleryValue: !jinja >
+    {%set factor = namespace(value = (1 if (not RoomContext or not MaxNumberAppearingRoaming) else MaxNumberAppearingRoaming/NumberAppearingRoaming))%}
+    {%set total = namespace(value = 0) %}
+    {%for g in range(Jewellery.Amount)%}{%set jroll = (range(1, 6)|random)+(range(1,6)|random)+(range(1,6) | random) %}
+    {%set total.value = total.value + 100*jroll%}
+    {%endfor%}
+    {{total.value/factor.value}}
+
+  Details: !jinja >
+    {%-set factor = namespace(value = (1 if (not RoomContext or not MaxNumberAppearingRoaming) else MaxNumberAppearingRoaming/NumberAppearingRoaming))-%}
+    {%-set items = namespace(list = [])-%}
+    {%-set gptotal = namespace(value = 0)-%}
+    {%-if cp1000.Roll <= cp1000.Odds or sp1000.Roll <= sp1000.Odds or ep1000.Roll <= ep1000.Odds or gp1000.Roll <= gp1000.Odds or pp1000.Roll <= pp1000.Odds-%}
+    {%-set items.list = items.list + [('__'+(GoldValue | float | currency)+'__')]-%}
+    {%-endif-%}
+    {%-if Gems.Roll <= Gems.Odds-%}
+    {%-set items.list = items.list + ['__'+(Gems.Amount|string)+' gems__ worth __'+(GemsValue | float |currency)+'__ in total']-%}
+    {%-endif-%}
+    {%-if Jewellery.Roll <= Jewellery.Odds-%}
+    {%-set items.list = items.list + ['__'+(Jewellery.Amount|string)+' jewellery items__ worth  __'+(JewelleryValue | float |currency)+'__ in total']-%}
+    {%-endif-%}
+    {%-if MagicItems.Amount > 0 and MagicItems.Roll <= (MagicItems.Odds / 1)%} {%set items.list = items.list + ['__'+MagicItem1.Description+'__']%}{%endif-%}
+    {%-if MagicItems.Amount > 1 and MagicItems.Roll <= (MagicItems.Odds / 2)%} {%set items.list = items.list + ['__'+MagicItem2.Description+'__']%}{%endif-%}
+    {%-if MagicItems.Amount > 2 and MagicItems.Roll <= (MagicItems.Odds / 3)%} {%set items.list = items.list + ['__'+MagicItem3.Description+'__']%}{%endif-%}
+    {%-if MagicItems.Amount > 3 and MagicItems.Roll <= (MagicItems.Odds / 4)%} {%set items.list = items.list + ['__'+MagicItem4.Description+'__']%}{%endif-%}
+    {%-if MagicItems.Amount > 4 and MagicItems.Roll <= (MagicItems.Odds / 5)%} {%set items.list = items.list + ['__'+MagicItem5.Description+'__']%}{%endif-%}
+    {%-if MagicItems.Amount > 5 and MagicItems.Roll <= (MagicItems.Odds / 6)%} {%set items.list = items.list + ['__'+MagicItem6.Description+'__']%}{%endif-%}
+    {%-for i in items.list%}
+        * {{i}}{%endfor%}
+
+
+TreasureTypeIndividuals:
+  $extends: TreasureType
+  PiecesFactor: 0.001
+
+RandomMagicItem:
+  $subclass: !weighted
+    - RandomMagicArmor^10
+    - RandomMiscItem^5
+    - RandomPotion^20
+    - RandomRing^15
+    - RandomRodStaffWand^5
+      #- RandomScrollMap x10
+    - RandomMagicSword^20
+    - RandomMagicWeapon^5
+
+
+TreasureTypeNone:
+  Empty: True
+  cp1000:
+    Amount: 0
+  sp1000:
+    Amount: 0
+  ep1000:
+    Amount: 0
+  gp1000:
+    Amount: 0
+  pp1000:
+    Amount: 0
+
+
+TreasureTypeTusks:
+  $extends: TreasureTypeNone
+  Details: "Tusks"
+
+
+TreasureTypeHorn:
+  $extends: TreasureTypeNone
+  Details: "Horn"
+
+
+TreasureTypeHoney:
+  $extends: TreasureTypeNone
+  Details: "Horn"
+
+
+TreasureTypeA:
+  $extends: TreasureType
+  cp1000:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  sp1000:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  ep1000:
+    Odds: 20
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  gp1000:
+    Odds: 35
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 6d6
+  Jewellery:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 6d6
+  MagicItems:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount: 3
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem2:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem3:
+    $roll:
+      $class: RandomMagicItem
+
+
+TreasureTypeB:
+  $extends: TreasureType
+  cp1000:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  ep1000:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d3
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Jewellery:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  MagicItems:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount: 1
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+
+
+TreasureTypeC:
+  $extends: TreasureType
+  cp1000:
+    Odds: 20
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  ep1000:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d3
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  Jewellery:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  MagicItems:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount: 2
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem2:
+    $roll:
+      $class: RandomMagicItem
+
+
+TreasureTypeD:
+  $extends: TreasureType
+  cp1000:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 15
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 60
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount: 3
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem2:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem3:
+    $roll:
+      $class: RandomPotion
+
+
+TreasureTypeE:
+  $extends: TreasureType
+  cp1000:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d10
+  Jewellery:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d10
+  MagicItems:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount: 3
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem2:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem3:
+    $roll:
+      $class: RandomPotion
+
+
+TreasureTypeF:
+  $extends: TreasureType
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 2d10
+  ep1000:
+    Odds: 20 
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  gp1000:
+    Odds: 45
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  pp1000:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d3
+  Gems:
+    Odds: 20
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 2d12
+  Jewellery:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  MagicItems:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount: 3
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem2:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem3:
+    $roll:
+      $class: RandomPotion
+
+
+TreasureTypeG:
+  $extends: TreasureType
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 4d10
+  pp1000:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 3d6
+  Jewellery:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d10
+  MagicItems:
+    Odds: 35
+    Roll:
+      $diceroll: 1d100
+    Amount: 4
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem2:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem3:
+    $roll:
+      $class: RandomPotion
+  MagicItem4:
+    $roll:
+      $class: RandomPotion
+
+
+
+TreasureTypeH:
+  $extends: TreasureType
+  cp1000:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 3d8
+  sp1000:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d100
+  ep1000:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 4d10
+  gp1000:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 6d10
+  pp1000:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 5d4
+  Gems:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d100
+  Jewellery:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 10d4
+  MagicItems:
+    Odds: 15
+    Roll:
+      $diceroll: 1d100
+    Amount: 4
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem2:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem3:
+    $roll:
+      $class: RandomPotion
+  MagicItem4:
+    $roll:
+      $class: RandomPotion
+
+
+TreasureTypeI:
+  $extends: TreasureType
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Gems:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 2d6
+  Jewellery:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 2d6
+  MagicItems:
+    Odds: 15
+    Roll:
+      $diceroll: 1d100
+    Amount: 1
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+
+
+TreasureTypeJ:
+  $extends: TreasureType
+  cp1000:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  sp1000:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d3
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount: 0
+
+
+TreasureTypeK:
+  $extends: TreasureType
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  ep1000:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d2
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount: 0
+
+
+TreasureTypeL:
+  $extends: TreasureType
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  Jewellery:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount: 0
+
+
+TreasureTypeM:
+  $extends: TreasureType
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 40
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 2d4
+  pp1000:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 5d6
+  Gems:
+    Odds: 55
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 5d4
+  Jewellery:
+    Odds: 45
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 2d6
+  MagicItems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount: 0
+
+
+TreasureTypeN:
+  $extends: TreasureType
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 40
+    Roll:
+      $diceroll: 1d100
+    Amount: 
+      $diceroll: 2d4
+  MagicItem1:
+    $roll:
+      $class: RandomPotion
+  MagicItem2:
+    $roll:
+      $class: RandomPotion
+  MagicItem3:
+    $roll:
+      $class: RandomPotion
+  MagicItem4:
+    $roll:
+      $class: RandomPotion
+  MagicItem5:
+    $roll:
+      $class: RandomPotion
+  MagicItem6:
+    $roll:
+      $class: RandomPotion
+  MagicItem7:
+    $roll:
+      $class: RandomPotion
+  MagicItem8:
+    $roll:
+      $class: RandomPotion
+
+
+TreasureTypeO:
+  $extends: TreasureType
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  # TODO: These should be scrolls
+  MagicItem1:
+    $roll:
+      $class: RandomPotion
+  MagicItem2:
+    $roll:
+      $class: RandomPotion
+  MagicItem3:
+    $roll:
+      $class: RandomPotion
+  MagicItem3:
+    $roll:
+      $class: RandomPotion
+
+
+TreasureTypeP:
+  $extends: TreasureTypeIndividuals
+  cp1000:
+    Odds: 100
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 3d8
+  sp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount: 0
+
+
+TreasureTypeQ:
+  $extends: TreasureTypeIndividuals
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 100
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 3d6
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount: 0
+
+
+TreasureTypeR:
+  $extends: TreasureTypeIndividuals
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 100
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 2d6
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount: 0
+
+
+TreasureTypeS:
+  $extends: TreasureTypeIndividuals
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 100
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 2d4
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount: 0
+
+
+TreasureTypeT:
+  $extends: TreasureTypeIndividuals
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 100
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount: 0
+
+
+TreasureTypeU:
+  $extends: TreasureTypeIndividuals
+  cp1000:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d100
+  sp1000:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d100
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d100
+  gp1000:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d100
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  Jewellery:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  MagicItems:
+    Odds: 2
+    Roll:
+      $diceroll: 1d100
+    Amount: 1
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+
+
+TreasureTypeV:
+  $extends: TreasureTypeIndividuals
+  cp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d12
+  ep1000:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d100
+  gp1000:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d100
+  pp1000:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d100
+  Gems:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  Jewellery:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  MagicItems:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount: 1
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+
+
+TreasureTypeBody:
+  $extends: TreasureType
+  cp1000:
+    Odds: 80
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  sp1000:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 5 
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  Jewellery:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  MagicItems:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount: 1
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItemsOnBody
+
+
+TreasureTypeTier1:
+  $extends: TreasureType
+  cp1000:
+    Odds: 90
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  sp1000:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  ep1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 00
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  Jewellery:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount: 2
+  MagicItem1:
+    $roll:
+      $class: RandomPotion
+  MagicItem2:
+    $roll:
+      $class: RandomMagicItem
+
+
+TreasureTypeTier2:
+  $extends: TreasureType
+  cp1000:
+    Odds: 70
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 80
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  ep1000:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  gp1000:
+    Odds: 5
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  pp1000:
+    Odds: 0
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  Gems:
+    Odds: 05
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  Jewellery:
+    Odds: 05
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  MagicItems:
+    Odds: 10
+    Roll:
+      $diceroll: 1d100
+    Amount: 3
+  MagicItem1:
+    $roll:
+      $class: RandomPotion
+  MagicItem2:
+    $roll:
+      $class: RandomRing
+  MagicItem3:
+    $roll:
+      $class: RandomMagicItem
+
+
+TreasureTypeTier3:
+  $extends: TreasureType
+  cp1000:
+    Odds: 60
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 70
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  ep1000:
+    Odds: 80
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  gp1000:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  pp1000:
+    Odds: 5 
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  Gems:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 30
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 25
+    Roll:
+      $diceroll: 1d100
+    Amount: 4
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem2:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem3:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem4:
+    $roll:
+      $class: RandomMagicItem
+
+
+TreasureTypeTier4:
+  $extends: TreasureType
+  cp1000:
+    Odds: 80
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  sp1000:
+    Odds: 80
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  ep1000:
+    Odds: 80
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  gp1000:
+    Odds: 70
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d6
+  pp1000:
+    Odds: 50 
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d4
+  Gems:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  Jewellery:
+    Odds: 50
+    Roll:
+      $diceroll: 1d100
+    Amount:
+      $diceroll: 1d8
+  MagicItems:
+    Odds: 35
+    Roll:
+      $diceroll: 1d100
+    Amount: 4
+  MagicItem1:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem2:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem3:
+    $roll:
+      $class: RandomMagicItem
+  MagicItem4:
+    $roll:
+      $class: RandomMagicItem

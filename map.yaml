@@ -1,0 +1,269 @@
+Region:
+  Description: !jinja |
+    %%end_two_columns_layout_when_printing
+
+    <div class='pagebreak'> </div>
+
+    ### {{Name.Full}} {{Suffix}} <a name="{{uuid}}"></a> <h3 class="sticky">{{Name.Full}} {{Suffix}}</h3>
+
+    %%begin_two_columns_layout_when_printing
+
+    {% for hex in Hexmap %}
+    {{hex.Details}}
+    {% endfor %}
+  Name:
+    $roll: RegionNames
+
+  $subclass: !parameter region_classes
+
+
+MountainsRegion:
+  $extends: Region
+
+  Suffix:
+    - Mountains
+    - Ridge
+    - Range
+    - Peaks
+    - Teeth
+  $context:
+    $attr: Region
+    $values:
+      - Name
+      - Suffix
+  Hexmap:
+    $rollsome:
+      $class: MountainsHex
+      $min: !parameter minimum_tiles_per_mountains_region
+      $max: !parameter maximum_tiles_per_mountains_region
+
+
+PlainsRegion:
+  $extends: Region
+  Suffix:
+    - Plains
+  $context:
+    $attr: Region
+    $values:
+      - Name
+      - Suffix
+  Hexmap:
+    $rollsome:
+      $class: PlainsHex
+      $min: !parameter minimum_tiles_per_plains_region
+      $max: !parameter maximum_tiles_per_plains_region
+
+
+ForestRegion:
+  $extends: Region
+  Suffix:
+    - Forest
+    - Woods
+  $context:
+    $attr: Region
+    $values:
+      - Name
+      - Suffix
+  Hexmap:
+    $rollsome:
+      $class: ForestHex
+      $min: !parameter minimum_tiles_per_forest_region
+      $max: !parameter maximum_tiles_per_forest_region
+
+
+DesertRegion:
+  $extends: Region
+  Suffix:
+    - Dunes
+    - Desert
+    - Wastelands
+  $context:
+    $attr: Region
+    $values:
+      - Name
+      - Suffix
+  Hexmap:
+    $rollsome:
+      $class: DesertHex
+      $min: !parameter minimum_tiles_per_desert_region
+      $max: !parameter maximum_tiles_per_desert_region
+
+
+CoastRegion:
+  $extends: Region
+  Suffix:
+    - Coastline
+    - Shores
+  $context:
+    $attr: Region
+    $values:
+      - Name
+      - Suffix
+  Hexmap:
+    $rollsome:
+      $class: CoastHex
+      $min: !parameter minimum_tiles_per_coast_region
+      $max: !parameter maximum_tiles_per_coast_region
+
+
+HexProxy:
+  default: null  
+
+
+Hex:
+  $inc:
+    $global: HexCounter
+    $value: 1
+  Details: !jinja >
+
+    {%if DungeonDesc-%}
+    #### Hex {{'%02d' %  HexCounter}}: {{DungeonDesc}} {{MapRef}} <a name="{{uuid}}"></a>
+    {%elif SettlementDesc-%}
+    #### Hex {{'%02d' %  HexCounter}}: {{SettlementDesc}} {{MapRef}} <a name="{{uuid}}"></a>
+    {%elif InnDesc-%}
+    #### Hex {{'%02d' %  HexCounter}}: {{InnDesc}} {{MapRef}} <a name="{{uuid}}"></a>
+    {%elif EncounterDesc-%}
+    #### Hex {{'%02d' %  HexCounter}}: {{EncounterName}} {{MapRef}} <a name="{{uuid}}"></a>
+    {%else-%}
+    #### Hex {{'%02d' %  HexCounter}}: {{Feature.Name}} {{MapRef}} <a name="{{uuid}}"></a>
+    {%endif%}
+
+
+    {{Thumb}}
+
+
+    {{Terrain.Flair}}
+
+
+    {%if DungeonDesc-%}
+    The [__{{DungeonDesc}}__](#{{DungeonUUID}}) is hidden
+    {%if Terrain.Hideout%}{{Terrain.Hideout}}{%endif%} somewhere {{Terrain.Location}}.
+ 
+    ##### Entrances
+
+
+    {{DungeonEntrance}}
+
+    {%elif SettlementDesc-%}
+    The {{SettlementPrefix}} [__{{SettlementDetails}}__](#{{SettlementUUID}}) {{SettlementConnector}} {{Terrain.Location}}.
+    {{SettlementFlair}}
+    {%elif InnDesc%}
+    [__{{InnDesc}}__](#{{InnUUID}}) is welcoming travellers and adventurers {{Terrain.Location}}.
+    {%elif EncounterDesc-%}
+    {{EncounterDesc}} {{Terrain.Location}}.
+    {{EncounterProbability}}
+    {{EncounterFlair}}
+    {%else-%}
+    {{Feature.Description}} {{Feature.Connector}} {{Terrain.Location}}.
+
+    {{Feature.Probability}}
+
+    {{Feature.Flair}}
+
+
+    ##### Random encounter
+
+    
+    There's a __1 in 6__ chance when exploring (or __2 in 6__ chance if camping overnight) to be ambushed or preyed upon by:
+
+    {%set counter = namespace(value=1)%}
+
+
+    <div class='condensed'></div>
+
+
+    | 1d4 | Encounter | Stats | 
+
+    | --- | --------- | ----- |{%for e in OtherEncounters%}
+
+    | {{counter.value}} | {{e.TitlePluralizedByLair}} | {{e.Stats}} |
+
+    {%-set counter.value = counter.value+1-%}{%-endfor%}
+
+
+    {%endif%}
+  $sublcass:
+    - MountainsHex
+    - PlainsHex
+    - ForestHex
+    - DesertHex
+    - CoastHex
+  Feature:
+    $roll: Feature
+
+  DungeonDesc: null
+  SettlementDesc: null
+  InnDesc: null
+  EncounterDesc: null
+  HexNumber: !jinja "{{'%02d' % HexCounter}}"
+  HexProxy:
+    $roll:
+      $class: HexProxy
+      $bootstrap:
+        HexCounter: !ref HexCounter
+        HexUUID: !ref uuid
+
+
+MountainsHex:
+  $extends: Hex
+  Terrain:
+    $roll: Mountains
+  Monster:
+    $roll: MountainsFeatureEncounter
+  OtherEncounters:
+    $rollsome:
+      $class: MountainsRandomEncounter
+      $min: 4
+      $max: 4
+
+
+PlainsHex:
+  $extends: Hex
+  Terrain:
+    $roll: Plains
+  Monster:
+    $roll: MountainsFeatureEncounter
+  OtherEncounters:
+    $rollsome:
+      $class: MountainsRandomEncounter
+      $min: 4
+      $max: 4
+
+
+ForestHex:
+  $extends: Hex
+  Terrain:
+    $roll: Forest
+  Monster:
+    $roll: ForestFeatureEncounter
+  OtherEncounters:
+    $rollsome:
+      $class: ForestRandomEncounter
+      $min: 4
+      $max: 4
+
+
+DesertHex:
+  $extends: Hex
+  Terrain:
+    $roll: Desert
+  Monster:
+    $roll: DesertFeatureEncounter
+  OtherEncounters:
+    $rollsome:
+      $class: DesertRandomEncounter
+      $min: 4
+      $max: 4
+
+
+CoastHex:
+  $extends: Hex
+  Terrain:
+    $roll: Coast
+  Monster:
+    $roll: MountainsFeatureEncounter
+  OtherEncounters:
+    $rollsome:
+      $class: MountainsRandomEncounter
+      $min: 4
+      $max: 4

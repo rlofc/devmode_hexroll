@@ -1,0 +1,683 @@
+Advert:
+  Details: "..."
+
+
+QuestTreasureHiding:
+  Active: null
+  Conspectus: null
+  Listening: ""
+  Hint: "There’s a chest"
+  Description: "Inside the chest you find a treasure"
+
+
+Quest:
+  $subclass: !weighted
+    - NoQuest^9
+    - MissingPersonQuest
+    - TreasureQuest
+    - Relation
+
+
+NoQuest:
+  Description: ""
+
+
+RevengeQuest:
+  $extends: Quest
+
+
+MissingItemQuest:
+  $extends: Quest
+
+
+Secret:
+  Details: "[..]"
+
+
+QuestSecret:
+  $extends: Secret
+
+
+TreasureQuestSecret:
+  $extends: QuestSecret
+  Details: !jinja >
+    * {{FolkContext.Name.Full}}’s {{Artifact.Item}}
+    is in area {{Location.RoomContext.Ref}} in the
+    {{Location.DungeonContext.Name.Title}}
+
+
+TreasureQuest:
+  $extends: Quest
+  Description: !jinja >
+
+    * __{{Artifact.Appearance | title}}__ is lost (or so claimed).
+    (Secret: This is actually __{{Artifact.ActualItem | articlize}}__
+    and it is currently somewhere in the
+    [__{{Location.DungeonContext.Name.Title}}__](#{{Location.DungeonContext.HexUUID}}))
+        * Finder’s reward is __{{Artifact.Reward}}__
+
+
+  Rumor:
+    $roll:
+      $class: Rumor
+      $inject:
+        $namespace: quest
+        $values:
+          Details: !jinja >
+            [__{{quest.FolkContext.Name.Full}}’s__](#{{quest.FolkContext.uuid}})
+            __{{quest.Artifact.Appearance | title}}__ (actually
+            __{{quest.Artifact.ActualItem | articlize}}__) is somewhere in the
+            [{{quest.Location.DungeonContext.Name.Title}}](#{{quest.Location.DungeonContext.HexUUID}})
+  Advert:
+    $roll:
+      $class: Advert
+      $inject:
+        $namespace: quest
+        $values:
+          Details: !avoid_repeating
+            - !jinja >
+              “__Help requested!__  A heirloom of sentimental value was stolen
+              from me.  I will reward anyone who is kind enough to get it back.
+              Yours, 
+              [__{{quest.FolkContext.Name.Full}}__](#{{quest.FolkContext.uuid}})”
+            - !jinja >
+              “__Item LOST!__ A possession of mine was lost. 
+              Finders reward is guaranteed.
+              [__{{quest.FolkContext.Name.Full}}__](#{{quest.FolkContext.uuid}})”
+            - !jinja >
+              “__Stolen!__  Something very dear to me was stolen.
+              Please reach out if you can help.
+              [__{{quest.FolkContext.Name.Full}}__](#{{quest.FolkContext.uuid}})”
+
+
+  Artifact:
+    $roll: LostItem
+
+  TreasureContainer:
+    - A plain looking wooden chest
+    - An old dark leather bag
+    - A wooden barrel
+
+  Location:
+    $popone: 
+      $collection: hidings
+      $inject:
+        $namespace: quest
+        $values:
+          Active: !jinja >
+            {{quest.TreasureContainer}} contains 
+            [__{{quest.FolkContext.Name.Full}}’s__](#{{quest.FolkContext.uuid}})
+            (from __{{quest.CityContext.NamePart | title}}__) 
+            __{{quest.Artifact.Appearance | title}}__
+            (actually __{{quest.Artifact.ActualItem | articlize}}__)
+          Conspectus: !jinja >
+            [__{{quest.FolkContext.Name.Full}}’s__](#{{quest.FolkContext.uuid}})
+            __{{quest.Artifact.Appearance | title}}__ is in area {{RoomContext.Ref}}
+
+  Secret:
+    $roll:
+      $class: TreasureQuestSecret
+      $bootstrap:
+        FolkContext: !ref FolkContext
+        Location: !ref Location
+        Artifact: !ref Artifact
+
+
+MissingPersonQuestSecret:
+  $extends: QuestSecret
+  Details: !jinja >
+    * {{Relation.Name.Full}}’s {{Relation.Type}}
+    is held captive in {{Location.DungeonContext.Name.Title | title}}
+
+
+MissingPersonRelation:
+  $subclass:
+    - MissingPersonSon
+    - MissingPersonDaughter
+    - MissingPersonNephew
+    - MissingPersonWife
+    - MissingPersonHusband
+
+
+MissingPersonSon:
+  Type: son
+  Gender:
+    $roll: Male
+  Name:
+    $roll:
+      $class: Name 
+      $bootstrap:
+        Gender: !ref Gender
+
+
+MissingPersonDaughter:
+  Type: daughter
+  Gender:
+    $roll: Female
+  Name:
+    $roll:
+      $class: Name 
+      $bootstrap:
+        Gender: !ref Gender
+
+
+MissingPersonNephew:
+  Type: nephew
+  Gender:
+    $roll: Male
+  Name:
+    $roll:
+      $class: Name 
+      $bootstrap:
+        Gender: !ref Gender
+
+
+MissingPersonWife:
+  Type: wife
+  Gender:
+    $roll: Female
+  Name:
+    $roll:
+      $class: Name 
+      $bootstrap:
+        Gender: !ref Gender
+
+
+MissingPersonHusband:
+  Type: husband
+  Gender:
+    $roll: Male
+  Name:
+    $roll:
+      $class: Name 
+      $bootstrap:
+        Gender: !ref Gender
+
+
+MissingPersonQuestReward:
+  $subclass:
+    - MissingPersonQuestItemReward
+    - MissingPersonQuestTreasureReward
+
+MissingPersonQuestItemReward:
+  Details: !jinja >
+    __{{Reward.Appearance | articlize}}__ (actually __{{Reward.ActualItem | articlize}}__)
+  Reward:
+    $roll: LostItem
+
+
+MissingPersonQuestTreasureReward:
+  Details: !jinja "__{{Reward}}__"
+  Reward:
+    - 200 gp
+    - 800 gp
+    - 1200 gp
+    - 1700 gp
+    - 2200 gp
+    - 2300 gp
+
+MissingPersonQuestCell:
+  Hint: "a person is chained to the wall"
+  Active: null
+  Conspectus: null
+
+MissingPersonQuest:
+  $extends: Quest
+  Description: !jinja >
+
+    * __{{Relation.Type | capitalize}}__ is missing since last week.  (Secret:
+    Held captive in the __[{{Location.DungeonContext.Name.Title}}](#{{Location.DungeonContext.HexUUID}})__)
+        * Recovery reward is {{Reward.Details}}.
+
+  Reward:
+    $roll: MissingPersonQuestReward
+
+  Timeframe:
+    - two days ago
+    - last week
+    - two weeks ago
+    - last month
+  Rumor:
+    $roll:
+      $class: Rumor
+      $inject:
+        $namespace: quest
+        $values:
+          Details: !jinja >
+            [__{{quest.FolkContext.Name.Full}}’s__](#{{quest.FolkContext.uuid}})
+            __{{quest.Relation.Type}}__ is held captive in the
+            [__{{quest.Location.DungeonContext.Name.Title | title}}__](#{{quest.Location.DungeonContext.HexUUID}})
+
+  Advert:
+    $roll:
+      $class: Advert
+      $inject:
+        $namespace: quest
+        $values:
+          Details: !avoid_repeating
+            - !jinja >
+              “__Please Help!__
+              My dear {{quest.Relation.Type}} is missing.
+              I am worried sick and will reward anyone who will help.
+              Yours faithfully,
+              [__{{quest.FolkContext.Name.Full}}__](#{{quest.FolkContext.uuid}})”
+            - !jinja >
+              “__Urgent!!__
+              My {{quest.Relation.Type}} did not return home 
+              since {{quest.Timeframe}}. If you have seen
+              {{quest.Relation.Gender.Pronoun3}} or can help me find
+              {{quest.Relation.Gender.Pronoun3}}, please contact me
+              as soon as possible.
+              Yours,
+              [__{{quest.FolkContext.Name.Full}}__](#{{quest.FolkContext.uuid}})”
+            - !jinja >
+              “__{{quest.Relation.Type|capitalize}} is missing!__
+              My {{quest.Relation.Type}} is missing since {{quest.Timeframe}}.
+              Please reach out to me if you can help.
+              [__{{quest.FolkContext.Name.Full}}__](#{{quest.FolkContext.uuid}})”
+
+
+  Relation:
+    $roll: MissingPersonRelation
+
+  Location:
+    $popone: 
+      $collection: cells
+      $inject:
+        $namespace: quest
+        $values:
+          Active: !jinja >
+            The __chained person__ is 
+            [__{{quest.FolkContext.Name.Full}}’s__](#{{quest.FolkContext.uuid}})
+            __{{quest.Relation.Type}}__ from {{quest.CityContext.NamePart | title}}
+          Conspectus: !jinja >
+            [__{{quest.FolkContext.Name.Full}}’s__](#{{quest.FolkContext.uuid}})
+            __{{quest.Relation.Type}}__ is in area {{RoomContext.Ref}}
+          Pronoun: !jinja "{{quest.Relation.Gender.Pronoun}}"
+          Pronoun2: !jinja "{{quest.Relation.Gender.Pronoun2}}"
+
+  Secret:
+    $roll:
+      $class: MissingPersonQuestSecret
+      $bootstrap:
+        FolkContext: !ref FolkContext
+        Relation: !ref Relation
+        Location: !ref Location
+
+
+LostItem:
+  Description: !jinja >
+    __{{Appearance | title}}__ (actually __{{ActualItem | articlize}}__)
+  $subclass: !weighted
+    - LostItemSword^10
+    - LostItemArmor^7
+    - LostItemHighTier^4
+
+
+LostItemHighTier:
+  $subclass: !weighted
+    - LostItemBoots^3
+    - LostItemClothing^3
+    - LostItemHelm^4
+    - LostItemBag
+    - LostItemAmulet
+    - LostItemBroom
+    - LostItemCrystalBall
+    - LostItemDrums
+    - LostItemBottle
+    - LostItemDevice
+    - LostItemCarpet
+    - LostItemGirdle
+    - LostItemHorn
+    - LostItemMirror
+    - LostItemRope
+    - LostItemScarab
+  Reward:
+    - 1200gp
+    - 1700gp
+    - 2200gp
+    - 2300gp
+
+
+LostItemBag:
+  $extends: LostItemHighTier
+  Appearance:
+    - decorated leather bag
+    - reinforced leather bag
+
+  ActualItem:
+    - Bag of Devouring
+    - Bag of Holding
+
+
+LostItemBoots:
+  $extends: LostItemHighTier
+  Appearance:
+    - sturdy leather boots
+    - custom-made leather boots
+
+  ActualItem:
+    - Boots of Levitation
+    - Boots of Speed
+    - Boots of Travelling and Leaping
+
+
+LostItemAmulet:
+  $extends: LostItemHighTier
+  Appearance:
+    - family amulet
+
+  ActualItem:
+    - Amulet of Protection Against Scrying
+    - Medallion of ESP 30’
+
+
+LostItemBroom:
+  $extends: LostItemHighTier
+  Appearance:
+    - handcrafted broom
+
+  ActualItem:
+    - Broom of Flying
+
+
+LostItemClothing:
+  $extends: LostItemHighTier
+  Appearance:
+    - embroided cloak
+
+  ActualItem:
+    - Displacer Cloak
+    - Elven Cloak and Boots
+
+
+LostItemSword:
+  $extends: LostItem
+  Reward:
+    - 230gp
+    - 440gp
+    - 390gp
+    - 320gp
+  Appearance:
+    - decorated sword
+    - custom sword
+
+  ActualItem: !weighted
+    - Sword +1^11
+    - Sword +2^4
+    - Sword +1, +2 vs Lycanthropes
+    - Sword +1, +2 vs Spell Users
+    - Sword +1, +3 vs Dragons
+    - Sword +1, +3 vs Enchanted Creatures
+    - Sword +1, +3 vs Regenerating Creatures
+    - Sword +1, +3 vs Undead
+    - Sword +1, Flaming
+    - Sword +1, Light
+    - Sword +1, Light
+    - Sword +1, Locate Objects
+    - Sword +1, Locate Objects
+    - Sword +1, Wishes
+    - Sword +2, Charm Person
+    - Sword +3 
+
+
+LostItemHelm:
+  $extends: LostItemHighTier
+  Appearance:
+    - decorated helm
+    - golden helm
+    
+  ActualItem:
+    - Helm of Alignment Changing
+    - Helm of Reading Languages and Magic
+    - Helm of Telepathy
+    - Helm of Teleportation
+
+
+LostItemGauntlets:
+  $extends: LostItemHighTier
+  Appearance:
+    - golden gauntlets
+    - decorated gauntlets
+
+  ActualItem:
+    - Gauntlets of Ogre Power
+
+
+LostItemArmor:
+  $extends: LostItem
+  Reward:
+    - 230gp
+    - 440gp
+    - 390gp
+    - 320gp
+  Appearance:
+    - custom-fit armor
+    - decorated armor
+    - armor of sentimental value
+  ActualItem: !weighted
+    - Armour +1^6
+    - Armour +2^3
+    - Armour +3
+
+
+LostItemCrystalBall:
+  $extends: LostItemHighTier
+  Appearance:
+    - glass ball
+  
+  ActualItem:
+    - Crystal Ball
+    - Crystal Ball with Clairaudience
+    - Crystal Ball with ESP
+
+
+LostItemDrums:
+  $extends: LostItemHighTier
+  Appearance:
+    - drums
+
+  ActualItem:
+    - Drums of Panic
+
+
+LostItemBottle:
+  $extends: LostItemHighTier
+  Appearance:
+    - bottle of sentimental value
+
+  ActualItem:
+    - Efreeti Bottle
+
+
+LostItemDevice:
+  $extends: LostItemHighTier
+  Appearance:
+    - contraption
+
+  ActualItem:
+    - "Elemental Summoning Device: Air"
+    - "Elemental Summoning Device: Earth"
+    - "Elemental Summoning Device: Fire"
+    - "Elemental Summoning Device: Water"
+
+
+LostItemCarpet:
+  $extends: LostItemHighTier
+  Appearance:
+    - colorful carpet
+    - wool carpet
+    - dragon's skin carpet
+
+  ActualItem:
+    - Flying Carpet
+
+
+LostItemGirdle:
+  $extends: LostItemHighTier
+  Appearance:
+    - girdle
+  ActualItem:
+    - Girdle of Giant Strength
+
+
+LostItemHorn:
+  $extends: LostItemHighTier
+  Appearance:
+    - horn
+
+  ActualItem:
+    - Horn of Blasting
+
+
+LostItemMirror:
+  $extends: LostItemHighTier
+  Appearance:
+    - makeup mirror
+    - mirror
+  ActualItem:
+    - Mirror of Life Trapping
+
+
+LostItemRope:
+  $extends: LostItemHighTier
+  Appearance:
+    - strong rope
+  ActualItem:
+    - Rope of Climbing
+
+
+LostItemScarab:
+  $extends: LostItemHighTier
+  Appearance:
+    - scarab
+  ActualItem:
+    - Scarab of Protection
+
+ShopQuest:
+  $subclass: !weighted
+    - NoQuest^6
+    - DeliveryQuest
+
+
+DeliveryQuest:
+  $extends: Quest
+
+  Destination:
+    $pickone:
+      $collection: characters
+
+  $validif:
+    $condition: >
+      {{True if Destination['CityContext']['uuid'] !=
+        ShopContext['Owner']['CityContext']['uuid'] else False}}
+    $orclear:
+      - Destination
+
+  Reward:
+    - 500 gp
+    - 600 gp
+    - 700 gp
+
+  PackagePrefix:
+    - sealed
+    - mysterious
+
+  PackageObject:
+    - bottle
+    - box
+    - chest
+    - crate
+    - casket
+
+  Package: !jinja >
+    a {{PackagePrefix}} {{PackageObject}}
+
+  Description: !jinja >
+
+    * Looking for someone to deliver {{Package}} to 
+    [__{{Destination.Name.Full}}__](#{{Destination.uuid}})
+    in __{{Destination.CityContext.NamePart | title}}__.
+        * Reward is __{{Reward}}__
+
+  Advert:
+    $roll:
+      $class: Advert
+      $inject:
+        $namespace: quest
+        $values:
+          Details: !avoid_repeating
+            - !jinja >
+              “__Job offer!__ I have a package to deliver in {{quest.Destination.CityContext.NamePart | title}}. 
+              Payment guaranteed at destination upon delivery.
+              Yours, 
+              [__{{quest.ShopContext.Owner.Name.Full}}__](#{{quest.ShopContext.Owner.uuid}})”
+            - !jinja >
+              “__Traveling to {{quest.Destination.CityContext.NamePart | title}}?__
+              I will pay you for carrying a package for me.
+              Yours, 
+              [__{{quest.ShopContext.Owner.Name.Full}}__](#{{quest.ShopContext.Owner.uuid}})”
+            - !jinja >
+              “__Heading to {{quest.Destination.CityContext.NamePart | title}}?__
+              Payment guaranteed to a trusty courier. 
+              Ask for [__{{quest.ShopContext.Owner.Name.First}}__](#{{quest.ShopContext.Owner.uuid}})”
+  Rumor:
+    $roll:
+      $class: Rumor
+      $inject:
+        $namespace: quest
+        $values:
+          Details:
+            - !jinja >
+              [__{{quest.ShopContext.Owner.Name.Full}}__](#{{quest.ShopContext.Owner.uuid}})
+              is willing to pay well for a delivery job.
+            - !jinja >
+              [__{{quest.ShopContext.Owner.Name.Full}}__](#{{quest.ShopContext.Owner.uuid}})
+              {{quest.ShopContext.Owner.Gender.Pos}} a {{quest.PackageObject}} 
+              {{quest.ShopContext.Owner.Gender.Pronoun}} would like delivered to
+              {{quest.Destination.CityContext.NamePart | title}}
+
+
+EscortQuest:
+  Destination:
+    $pickone:
+      $collection: hex_proxies
+
+  Frequency:
+    - Once a season
+    - Twice a season
+    - Twice a year
+
+  Description: !jinja >
+
+    * {{Frequency}}, {{ShopContext.Owner.Name.First}} will want to __{{ShopContext.HexQuestMission}}__ in
+    __[hex {{Destination.HexCounter}}](#{{Destination.HexUUID}})__ ({{Destination.Region.Name.Full}} {{Destination.Region.Suffix}})
+    and will look for someone to protect {{ShopContext.Owner.Gender.Pronoun3}} throughout the
+    journey.
+
+  Reward:
+    - 500 gp
+    - 600 gp
+    - 700 gp
+
+
+Relation:
+  $extends: Quest
+  Description: !jinja >
+
+    * {{FolkContext.Name.First}} {{FolkContext.Gender.Pos}} {{What}}
+    [__{{Related.Name.Full}}__](#{{Related.uuid}}).
+
+  What:
+    - some __unfinished business__ with
+    - a severe __dispute__ with
+    - a __grudge__ against
+    - __bad blood__ with
+    - a __vendetta__ against
+    - an __affair__ with
+    - a __special interest__ in
+    - is __in love__ with
+
+  Related:
+    $pickone:
+      $collection: characters

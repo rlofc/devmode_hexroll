@@ -1,0 +1,929 @@
+MagicItems:
+  $extends: Shop
+  Title: Magic Items
+  Noun:
+    - staff
+    - orb
+    - dust
+    - star
+    - light
+    - illusion
+    - gremlin
+
+BakeryProducts:
+  $subclass:
+    - Bread
+    - Pie
+    - Cake
+    - Flour
+
+
+Bakery:
+  $extends: Shop
+  Title: Bakery
+  Items:
+    $rollsome:
+      $class: BakeryProducts
+      $min: 2
+      $max: 3 
+  Noun:
+    - Loaf
+    - Bagette
+    - Bun
+
+
+GeneralGoodsProducts:
+  $subclass:
+    - Storage
+    - HolyItems
+    - Tools
+    - Lighting
+    - Wearables
+
+
+GeneralGoods:
+  $extends: Shop
+  Title: General Goods
+  Items:
+    $rollsome:
+      $class: GeneralGoodsProducts
+      $min: 7
+      $max: 10 
+  Noun:
+    - Goods
+    - Supply
+
+
+BookstoreProducts:
+  $subclass:
+    - EmptyScroll
+    - Inkvial
+    - Quill
+
+
+Bookstore:
+  $extends: Shop
+  Title: Bookstore
+  Items:
+    $rollsome:
+      $class: BookstoreProducts
+      $min: 2
+      $max: 3 
+  Noun:
+    - scrolls
+    - pages
+    - books
+
+
+Grocer:
+  $extends: Shop
+  Title: Grocer
+  Items:
+    $rollsome:
+      $class: Food
+      $min: 7
+      $max: 10
+  Noun:
+    - Groceries
+    - Tomato
+    - Supply
+  
+
+Pet:
+  $subclass: !avoid_repeating
+    - PetCat
+    - PetDog
+    - PetRaven
+    - PetRat
+    - PetMonkey
+    - PetOwl
+    - PetWolf
+    - PetFish
+    - PetLizard
+    - PetParrot
+    - PetSnake
+    - PetSongBird
+
+
+PetCat:
+  $extends: Pet
+  Title: Cat
+  Cost: 1
+
+
+PetDog:
+  $extends: Pet
+  Title: Dog
+  Cost: 4
+
+
+PetRaven:
+  $extends: Pet
+  Title: Raven
+  Cost: 3
+
+
+PetRat:
+  $extends: Pet
+  Title: Rat
+  Cost: 2 sp
+
+
+PetMonkey:
+  $extends: Pet
+  Title: Monkey
+  Cost: 10
+
+
+PetOwl:
+  $extends: Pet
+  Title: Owl
+  Cost: 16
+
+
+PetWolf:
+  $extends: Pet
+  Title: Wolf
+  Cost: 9
+
+
+PetFish:
+  $extends: Pet
+  Title: Fish
+  Cost: 0.4
+
+
+PetLizard:
+  $extends: Pet
+  Title: Lizard
+  Cost: 1
+
+
+PetParrot:
+  $extends: Pet
+  Title: Parrot
+  Cost: 19
+
+
+PetSnake:
+  $extends: Pet
+  Title: Snake
+  Cost: 3
+
+
+PetSongBird:
+  $extends: Pet
+  Title: Song Bird
+  Cost: 2
+
+
+PetShop:
+  $extends: Shop
+  Title: Pet Shop
+  Items:
+    $rollsome:
+      $class: Pet
+      $min: 3
+      $max: 5
+  Noun:
+    - petshop
+    - sidekicks
+    - friends
+
+
+Herbalist:
+  $extends: Shop
+  Title: Herbalist
+  Noun:
+    - greens
+    - weeds
+    - mushroom
+  
+  HexQuestMission:
+    - harvest exotic herbs
+    - forage exotic mushrooms
+  $context:
+    $attr: ShopContext
+    $values:
+      - Owner
+      - HexQuestMission
+  HexQuest:
+    $roll: EscortQuest
+
+
+Potion:
+  $extends: Shop
+  Title: Poitions
+
+
+ExoticGoods:
+  $extends: Shop
+  Title: Exotic Goods
+  Noun:
+    - exotic
+    - curiosities
+  HexQuestMission:
+    - acquire exotic artifacts
+  $context:
+    $attr: ShopContext
+    $values:
+      - Owner
+      - HexQuestMission
+  HexQuest:
+    $roll: EscortQuest
+
+
+Jeweler:
+  $extends: Shop
+  Title: Jeweler
+  Noun:
+    - gems
+    - jewels
+    - sparkly things
+
+
+Bunkhouse:
+  $extends: Shop
+  Title: Bunkhouse
+
+
+Carpenter:
+  $extends: Shop
+  Title: Carpenter
+  Noun:
+    - carpentry
+    - woodcraft
+    - workshop
+
+
+Mount:
+  $subclass:
+    - Camel
+    - DraftHorse
+    - RidingHorse
+    - WarHorse
+    - Mule
+
+
+Stables:
+  $extends: Shop
+  Title: Stables
+  Items:
+    $rollsome:
+      $class: Mount
+      $min: 2
+      $max: 6
+  Noun:
+    - mounts
+    - stallions
+    - riders
+
+
+ArmorWeapons:
+  $extends: Shop
+  Title: Armor & Weapons
+  Items:
+    $rollsome:
+      $class: ArmorWeapon
+      $min: 5
+      $max: 10
+  Noun:
+    - blade
+    - shield & sword
+    - spear
+    - archer
+
+
+Hatter:
+  $extends: Shop
+  Title: Hatter
+  Items:
+    $rollsome:
+      $class: Hats
+      $min: 2
+      $max: 3
+  Noun:
+    - cap
+    - top hat
+   
+
+Butchery:
+  $extends: Shop
+  Title: Butchery
+  Items:
+    $rollsome:
+      $class: MeatAndFish
+      $min: 6
+      $max: 10 
+  Noun:
+    - Beef & Pork
+    - Prime Cut
+    - Steak
+  HexQuestMission:
+    - go on a big-game hunt
+  $context:
+    $attr: ShopContext
+    $values:
+      - Owner
+      - HexQuestMission
+  HexQuest:
+    $roll: EscortQuest
+
+
+Clothing:
+  $extends: Shop
+  Title: Clothing
+  Items:
+    $rollsome:
+      $class: Wearables
+      $min: 2
+      $max: 6
+  Noun:
+    - Fashion
+    - Wearables
+    - Boutique
+
+
+Blacksmith:
+  $extends: Shop
+  Title: Blacksmith
+  Noun:
+    - Anvil
+    - Iron
+    - Blade
+    - Forge
+    - Hammer
+    - Fire
+   
+  Items:
+    $rollsome:
+      $class: ArmorWeapon
+      $min: 2
+      $max: 6
+
+
+Barber:
+  $extends: Shop
+  Title: Barber
+  Noun:
+    - Scissors
+    - Razor
+    - Salon
+
+
+Liquor:
+  $extends: Shop
+  Title: Liquor
+  Items:
+    $rollsome:
+      $class: Drinks
+      $min: 2
+      $max: 6
+  Noun:
+    - Liquor
+    - Spirits
+
+
+Craft:
+  $extends: Shop
+  Title: Craft
+  Items:
+    $rollsome:
+      $class: Tools
+      $min: 2
+      $max: 6
+  Noun:
+    - Crafts
+    - Handmades
+
+
+Music:
+  $extends: Shop
+  Title: Music
+  Items:
+    $rollsome:
+      $class: MusicalInstruments
+      $min: 1
+      $max: 3
+  Noun:
+    - Instruments
+    - Guitar & Flute
+    - Harp & Lute
+  HexQuestMission:
+    - find exquisite tonewood
+  $context:
+    $attr: ShopContext
+    $values:
+      - Owner
+      - HexQuestMission
+  HexQuest:
+    $roll: EscortQuest
+
+Salon:
+  $extends: Shop
+  Title: Salon
+  Noun:
+    - Salon
+    - Styles
+
+
+Cartographer:
+  $extends: Shop
+  Title: Cartographer
+  Noun:
+    - Maps
+    - Mapmakers
+    - cartography
+
+
+Spice:
+  $extends: Shop
+  Title: Spices
+  Noun:
+    - Spices
+    - Salt & Pepper
+
+
+Bathhouse:
+  $extends: Shop
+  Title: Bathhouse
+  Noun:
+    - Baths
+    - Steam & Bath
+
+
+Casino:
+  $extends: Shop
+  Title: Casino
+  Noun:
+    - Easy-money
+    - Casino
+    - Dicerollers
+
+
+AnimalSupplies:
+  $extends: Shop
+  Title: Animal Supplies
+  Noun:
+    - Barn & Yarn
+
+
+Occult:
+  $extends: Shop
+  Title: Occult
+  Noun:
+    - Ritual Goods
+    - Witchcraft Materials
+  HexQuestMission:
+    - explore for mysterious artifacts
+  $context:
+    $attr: ShopContext
+    $values:
+      - Owner
+      - HexQuestMission
+  HexQuest:
+    $roll: EscortQuest
+
+
+Winery:
+  $extends: Shop
+  Title: Winery
+  Items:
+    $rollsome:
+      $class: Drinks
+      $min: 1
+      $max: 3
+  Noun:
+    - Wines
+    - Fine Wines
+
+
+Brewery:
+  $extends: Shop
+  Title: Brewery
+  Items:
+    $rollsome:
+      $class: Drinks
+      $min: 1
+      $max: 3
+  Noun:
+    - Good Stuff
+    - Brews
+
+
+Distillery:
+  $extends: Shop
+  Title: Distillery
+  Items:
+    $rollsome:
+      $class: Drinks
+      $min: 1
+      $max: 3
+
+
+Flower:
+  $extends: Shop
+  Title: Flower Shop
+  Noun:
+    - Bouquets
+    - Flowers
+    - Roses
+    - Tulips
+
+
+Cobbler:
+  $extends: Shop
+  Title: Cobbler
+  Noun:
+    - Shoes
+    - Shoemakers
+
+
+Tinkerer:
+  $extends: Shop
+  Title: Tinkerer
+  Items:
+    $rollsome:
+      $class: Tools
+      $min: 3
+      $max: 5
+  Noun:
+    - Devices
+    - Fix-it-All
+
+
+Weaver:
+  $extends: Shop
+  Title: Weaver
+  Noun:
+    - Fabrics
+    - Garments
+
+
+Scribe:
+  $extends: Shop
+  Title: Scribe
+  Noun:
+    - Copywriters
+    - Ink & Feather
+
+
+Veterinarian:
+  $extends: Shop
+  Title: Veterinarian
+  Noun:
+    - Pet Hospital
+    - Horse Healers
+    - Sheep Whisperer
+
+
+DarkMarket:
+  $extends: Shop
+  Items:
+    $rollsome:
+      $class: Gear
+      $min: 9
+      $max: 15 
+  Title: Dark Market
+
+
+Brothel:
+  $extends: Shop
+  Title: Brothel
+  Noun:
+    - Companions
+
+
+Bank:
+  $extends: Service
+  Title: Bank
+
+
+GlassBlower:
+  $extends: Shop
+  Title: Glass Blower
+  Noun:
+    - Glassworks
+    - Tubes
+    - Bottlemakers
+
+
+Leatherworker:
+  $extends: Shop
+  Title: Leatherworker
+  Items:
+    $rollsome:
+      $class: LeatherMade
+      $min: 2
+      $max: 6
+  Noun:
+    - Leathers
+    - Bags and Such
+
+
+Physician:
+  $extends: Shop
+  Title: Physician
+  Noun:
+    - Clinic
+
+
+Barracks:
+  $extends: Service
+  Title: Barracks
+
+
+School:
+  $extends: Service
+  Title: School
+
+
+Daycare:
+  $extends: Service
+  Title: Daycare
+
+
+Museum:
+  $extends: Service
+  Title: Museum
+
+
+Library:
+  $extends: Service
+  Title: Library
+
+
+Lawyer:
+  $extends: Shop
+  Title: Lawyer
+  Noun:
+    - Will Makers
+    - Soliciters
+
+TinWorker:
+  $extends: Shop
+  Title: Tin Worker
+
+
+IndoorMarket:
+  $extends: Shop
+  Title: Indoor Market
+  Items:
+    $rollsome:
+      $class: Gear
+      $min: 10
+      $max: 14
+
+
+Nightclub:
+  $extends: Shop
+  Title: Nightclub
+
+
+CityHall:
+  $extends: Shop
+  Title: CityHall
+
+
+FishMarket:
+  $extends: Shop
+  Title: Fish Market
+  Items:
+    $rollsome:
+      $class: Fish
+      $min: 2
+      $max: 4
+  Noun:
+    - Fresh Fish
+    - Sea Products
+    - Daily Catch
+
+
+Nunnery:
+  $extends: Service
+  Title: Nunnery
+
+
+Tailor:
+  $extends: Shop
+  Title: Tailor
+  Items:
+    $rollsome:
+      $class: Wearables
+      $min: 2
+      $max: 6
+  Noun:
+    - Fashion
+    - Handmade Shirts and More
+    - Fine Clothes
+
+
+Prison:
+  $extends: Service
+  Title: Prison
+
+
+CityGuard:
+  $extends: Service
+  Title: City guard
+
+
+EventHall:
+  $extends: Shop
+  Title: Event Hall
+
+
+Orphanage:
+  $extends: Service
+  Title: Orphanage
+
+
+Enchanter:
+  $extends: Shop
+  Title: Enchanter
+
+
+PostOffice:
+  $extends: Shop
+  Title: Post Office
+
+
+Mill:
+  $extends: Shop
+  Title: Mill
+
+
+Smokehouse:
+  $extends: Shop
+  Title: Smokehouse
+  Noun:
+    - Smoked Goods
+    - Smoked Fish And More
+    - Smoked Meat And More
+
+
+GameShop:
+  $extends: Shop
+  Title: Game Shop
+  Noun:
+    - Games
+    - Pawns and Dice
+    - Cards and Balls
+    - Cards
+    - Dice
+
+Theater:
+  $extends: Service
+  Title: Theater
+
+
+Witch:
+  $extends: Shop
+  Title: Witch
+
+
+College:
+  $extends: Service
+  Title: College
+
+
+PrintingPress:
+  $extends: Shop
+  Title: Printing Press
+  Noun:
+    - Print Shop
+    - Prints
+    - Press
+
+AnimalPound:
+  $extends: Service
+  Title: Animal Pound
+
+
+EventPlanner:
+  $extends: Shop
+  Title: Event Planner
+
+
+Mortician:
+  $extends: Service
+  Title: Mortician
+
+
+Restaurant:
+  $extends: Shop
+  Title: Restaurant
+
+
+Tanner:
+  $extends: Shop
+  Title: Tanner
+
+
+Registry:
+  $extends: Service
+  Title: Registery
+
+
+TradePost:
+  $extends: Shop
+  Title: Trade Post
+
+
+VehicleMaker:
+  $extends: Shop
+  Title: Vehicle Maker
+
+
+Archive:
+  $extends: Service
+  Title: Archive
+
+
+FortuneTeller:
+  $extends: Shop
+  Title: Fortune Teller
+  Noun:
+    - Eye
+    - Third Eye
+    - Visions
+
+Matchmaker:
+  $extends: Shop
+  Title: Matchmaker
+
+
+ArtistsGuild:
+  $extends: Guild
+  Title: Artist Guild
+
+
+HuntersGuild:
+  $extends: Guild
+  Title: Hunters Guild
+
+
+FishermenGuild:
+  $extends: Guild
+  Title: Fishermen Guild
+
+
+ThievesGuild:
+  $extends: Guild
+  Title: Thieves Guild
+  Items:
+    $rollsome:
+      $class: Tools
+      $min: 2
+      $max: 6
+
+
+MerchantsGuild:
+  $extends: Guild
+  Title: Merchants Guild
+
+
+ScholarsGuild:
+  $extends: Guild
+  Title: Scholars Guild
+
+
+WritersGuild:
+  $extends: Guild
+  Title: Writers Guild
+
+
+AdventurersGuild:
+  $extends: Guild
+  Title: Adventurers Guild
+  Items:
+    $rollsome:
+      $class: Gear
+      $min: 2
+      $max: 6
+
+
+MagesGuild:
+  $extends: Guild
+  Title: Mages Guild
+
+
+BardsGuild:
+  $extends: Guild
+  Title: Bards Guild
+
+
+ArchitectsGuild:
+  $extends: Guild
+  Title: Architects Guild
+
+
+SailorsGuild:
+  $extends: Guild
+  Title: Sailors Guild
+
+
+KnightsGuild:
+  $extends: Guild
+  Title: Knights Guild
+

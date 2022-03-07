@@ -1,0 +1,1468 @@
+Guard:
+  $subclass:
+    - FighterLevel3
+    - FighterLevel4
+    - FighterLevel5
+    - FighterLevel6
+
+
+Settlement:
+  $collection: settlements
+
+  $subclass: !parameter settlement_classes
+
+  Name: !jinja "{{subclass_|capitalize}} of {{NamePart|title}}"
+
+  Description: !jinja |
+    {{subclass_|capitalize}} of {{NamePart|title}}
+
+  NamePart:
+    $roll: TownName
+
+Village:
+  $extends: Settlement
+  Title: !jinja "village of {{NamePart | title}}"
+
+  Population: !jinja "{{District.Population}}"
+
+  Details: !jinja >
+
+    %%end_two_columns_layout_when_printing
+
+    <div class='pagebreak'> </div>
+
+    ### {{subclass_|capitalize}} of {{NamePart|title}} <a name='{{uuid}}'></a> <h3 class="sticky"> {{Name}} </h3>
+
+
+    %%begin_two_columns_layout_when_printing
+
+
+    * Located in: {{HexLink}}
+
+    * Population: {{Population}} villagers
+
+
+    #### Village Shops & Services
+
+    <small>{{District.Index}}</small>
+
+
+    ##### {{District.Tavern.Title}}
+
+
+    {{District.Tavern.Description}}
+
+
+    {{District.Description}}
+
+  Handout: !jinja >
+
+    ### {{subclass_|capitalize}} of {{NamePart|title}} <a name='{{uuid}}'></a>
+
+    #### Village Shops & Services
+
+    {{District.Handout}}
+
+  $context:
+    $attr: CityContext
+    $values:
+      - uuid
+      - NamePart
+      - Title
+
+  Prefix:
+    - thriving
+    - bustling
+    - sleepy
+    - flourishing
+    - lively
+    - struggling
+    - growing
+    - withering
+    - prospering
+    - expanding
+
+  Connector: 
+    - blends seamlessly
+    - sits quietly
+    - rests peacefully
+
+  District:
+    $roll: VillageDistrict
+
+
+Town:
+  $extends: Settlement
+  Title: !jinja "town of {{NamePart | title}}"
+  PopulationMultiplier:
+    $diceroll: 2d4+1
+  Population: !jinja "{{(District.Population|int) * PopulationMultiplier}}"
+  Details: !jinja >
+
+    %%end_two_columns_layout_when_printing
+
+    <div class='pagebreak'> </div>
+
+    ### {{subclass_|capitalize}} of {{NamePart|title}} <a name='{{uuid}}'></a> <h3 class="sticky"> {{Name}} </h3>
+
+
+    %%begin_two_columns_layout_when_printing
+
+
+    * Located in: {{HexLink}}
+
+    * Population: {{Population}} townsfolk
+
+
+    #### Town Shops & Services
+
+    <small>{{District.Index}}</small>
+
+
+    ##### {{District.Tavern.Title}}
+
+
+    {{District.Tavern.Description}}
+
+
+    {{District.Description}}
+
+  Handout: !jinja >
+
+    ### {{subclass_|capitalize}} of {{NamePart|title}} <a name='{{uuid}}'></a>
+
+    #### Town Shops & Services
+
+    {{District.Handout}}
+
+  $context:
+    $attr: CityContext
+    $values:
+      - uuid
+      - NamePart
+      - Title
+
+  Connector:
+    - stands secure on high grounds
+    - sits behind a wall
+
+  District:
+    $roll: TownDistrict
+
+
+City:
+  $extends: Settlement
+  Title: !jinja "city of {{NamePart | title}}"
+
+  PopulationMultiplier:
+    $diceroll: 5d4+1
+
+  Population: !jinja "{{(districts | map(attribute='Population') | map('int') | sum)*PopulationMultiplier}}"
+
+  $collections:
+    all_shops:
+      $collect: Shop
+
+  $context:
+    $attr: CityContext
+    $values:
+      - uuid
+      - NamePart
+      - Title
+
+  districts:
+    $rollsome:
+      $class: CityDistrict
+      $min: 4
+      $max: 10
+
+  CitySpeciality: !jinja >
+    {% set x = namespace(count=1, title=[]) %}
+    {% for t in  (all_shops | groupby("Title") | map(attribute="list")) %}
+    {% if (t | length) > x.count %}
+    {% set x.title = [t[0].Title] %}
+    {% set x.count = (t | length) %}
+    {% endif %}
+    {% if (t | length) == x.count and x.count > 1 %}
+    {% set _ = x.title.append(t[0].Title) %}
+    {% endif %}
+    {% endfor %}
+    {% if (x.title | length) < 3 %}
+    The city is also known for its fine {{x.title | unique | list | listize}} shops.
+    {%endif%}
+
+
+  CityRulerNPC:
+    $roll:
+      $class: !weighted
+        - FighterLevel10
+        - FighterLevel11
+        - ClericLevel10
+        - ClericLevel11
+        - ElfLevel8
+        - ElfLevel9
+        - DwarfLevel9
+        - DwarfLevel10
+        - HalflingLevel7^2
+
+  CityRulerTitle:
+    - Mayor
+    - Baron
+
+  CityRulerDescriptor: !avoid_repeating
+    - fanatic, power hungry
+    - despised, power hungry
+    - corrupted, power hungry
+    - hated, power hungry
+    - despised tyrant
+    - fanatic tyrant
+    - power hungry tyrant
+    - hated tyrant
+    - tyrant and corrupt
+    - hated and corrupt
+    - honest but weak
+    - honest and just
+    - honest and canny
+    - noble but weak
+    - noble and just
+    - beloved but weak
+    - beloved and just
+    - beloved and canny
+    - cherished but weak
+    - cherished and just
+    - cherished and canny
+
+  CityFeature: !avoid_duplicates
+    - beautiful hanging gardens
+    - cheerful taverns
+    - developed cultural life
+    - helpful residents
+    - unsafe streets
+    - annual summer festival
+    - solstice festival of lights
+    - annual horse show
+    - fine crafts and art
+    - industrious residents
+    - odd laws and regulations
+
+
+  Flair: !jinja |
+    {{NamePart|title}} is ruled by the {{CityRulerDescriptor}}
+    {{CityRulerTitle}} {{CityRulerNPC.Name.Full}},
+    and is known for its {{CityFeature}}.
+
+  ConnectorTerm2b:
+    - guarded walls
+    - impenetrable walls
+    - tall walls
+    - massive walls
+  ConnectorTerm2a:
+    - protected behind
+    - covered behind
+    - behind
+    - surrounded by
+    - secured within its
+  ConnectorTerm1:
+    - stands
+    - stands boldly,
+    - stands majestically,
+    - decorates the horizon,
+    - is situated here,
+
+  Connector: !jinja "{{ConnectorTerm1}} {{ConnectorTerm2a}} {{ConnectorTerm2b}}"
+
+  Details: !jinja >
+
+    %%end_two_columns_layout_when_printing
+
+    <div class='pagebreak'> </div>
+
+    ### {{subclass_|capitalize}} of {{NamePart|title}} <a name='{{uuid}}'></a> <h3 class="sticky"> {{Name}} </h3>
+
+
+    %%begin_two_columns_layout_when_printing
+
+
+    * Located in: {{HexLink}}
+
+    * Population: {{Population}} residents
+
+
+    {{Flair}}
+
+    {{CitySpeciality}}
+
+
+    #### Shops & services overview
+
+    {% for d in districts %}
+
+    ##### {{d.Title}}
+
+    {{d.Index}}
+
+    {% endfor %}
+
+
+    {% for d in districts %}
+
+    #### {{d.Title}}
+
+    <small>{{d.Index}}</small>
+
+    ##### {{d.Tavern.Title}}
+
+    {{d.Tavern.Description}}
+
+
+    {{d.Description}}
+
+    {% endfor %}
+
+  Handout: !jinja >
+
+    ### {{subclass_|capitalize}} of {{NamePart|title}} <a name='{{uuid}}'></a>
+
+    #### Shops & services overview
+
+    {% for d in districts %}
+
+    ##### {{d.Title}}
+
+    {{d.Handout}}
+
+    {% endfor %}
+
+
+
+Hut:
+  $extends: Settlement
+  Description: None
+  Details: "..."
+
+TavernDish:
+  Description: !jinja >
+    {{Type}} {{Kind}} __{{MainIngrediant}}__,
+    {{Style}} __{{SecondIngrediant}}__ and {{Addition}}
+    __{{ThirdIngrediant}}__ for
+    __{{(Price*(DistrictContext.CostFactor if DistrictContext is defined else 1.0)) | currency}}__
+
+  Type:
+    - Stewed
+    - Barbecued
+    - Cooked
+
+  Kind:
+    - tenders of
+    - fillet of
+    - slices of
+    - chunks of
+
+  MainIngrediant:
+    - meat
+    - fish
+    - shellfish
+    - chicken
+    - pork
+
+  Style:
+    - marinated in
+    - glazed with
+
+  SecondIngrediant:
+    - ale
+    - red wine
+    - white wine
+    - honey and herbs
+    - garlic and wine
+
+  Addition:
+    - served with
+  
+  ThirdIngrediant:
+    - mashed potatoes
+    - baked potatoes
+    - cooked rice
+    - steamed vegetables
+    - fresh salad
+
+  Price:
+    - 0.15
+    - 0.2
+    - 0.25
+
+
+TavernMenu:
+  Details: !jinja >
+    {{Dishes | join('&#11037;', attribute='Description')}}
+
+  Dishes:
+    $rollsome:
+      $class: TavernDish
+      $min: 1
+      $max: 4
+
+Tavern:
+  Name:
+    $roll: TavernName
+  Title: !jinja "{{Name.Full}}<a name='{{uuid}}'></a>"
+  Description: !jinja |
+    ###### Keeper
+    
+    Owned and managed by <a name="{{keeper.uuid}}"></a>{{keeper.Description}}
+    
+    ###### Staff
+    {%for s in staff%}
+    <a name="{{s.uuid}}"></a>{{s.Description}}
+    {%endfor%}
+    ###### Menu
+
+    <div class="print_condensed"></div>
+
+    | 1d4 | Menu |
+    | --- | ------ |
+    | 1 | {{menus[0].Details}} |
+    | 2 | {{menus[1].Details}} |
+    | 3 | {{menus[2].Details}} |
+    | 4 | {{menus[3].Details}} |
+
+    ###### Patrons & Visitors
+
+    {{Faction}}
+
+    {%for p in patrons%}
+    ---
+
+    [{{p.Name.Full}}](#{{p.uuid}}) (when not in shop)
+    {%endfor%}{%for v in visitors%}
+    ---
+
+    <a name='{{v.uuid}}'></a>{{v.Description}}
+
+    {{v.Stats}}
+    {%endfor%}
+
+    %%end_two_columns_layout_when_printing
+
+    {%if adverts|list|length > 0%}
+    | Bulletin |
+    | ------ |{%for a in (adverts|shuffle)%}
+    | {{a.Details}} |{%endfor%}
+    {%endif%}
+
+    <br/>
+
+    {%set counter = namespace(value=0)%}
+    d6 | Rumor
+    ---- | -----
+    {%-if rumors-%}
+    {%-for r in rumors-%}
+    {%-set counter.value = counter.value+1%}
+    {{counter.value}} | {{r.Details}}
+    {%-endfor-%}
+    {%-endif-%}
+    {%-for r in (gc_rumors|shuffle|list)[:6-counter.value]-%}
+    {%-set counter.value = counter.value+1%}
+    {{counter.value}} | {{r.Details}}
+    {%-endfor%}
+
+    <br/>
+
+    %%begin_two_columns_layout_when_printing
+  menus:
+    $rollsome:
+      $class: TavernMenu
+      $min: 4
+      $max: 4
+
+  keeper:
+    $roll:
+      $class: Character
+      $inject:
+        $values:
+          Story2: ''
+
+  staff:
+    $rollsome:
+      $class: Character
+      $min: 1
+      $max: 3
+      $inject:
+        $values:
+          Story2: ''
+
+  visitors:
+    $rollsome:
+      $class: TavernVisitor
+      $min: 4
+      $max: 10
+
+
+DistrictTavern:
+  $extends: Tavern
+  Name:
+    $roll:
+      $class: !weighted
+        - InnName
+        - TavernName^2
+
+  patrons:
+    $popsome: 
+      $collection: district_characters_for_tavern
+      $min: 2
+      $max: 5
+      $inject:
+        $values:
+          TavernOfChoiceUUID: !ref uuid
+          TavernOfChoice: !ref Name
+
+  adverts:
+    $popsome: 
+      $collection: district_adverts_for_tavern
+      $min: 2
+      $max: 5
+
+  rumors:
+    $popsome:
+      $collection: district_rumors_for_tavern
+      $min: 2
+      $max: 5
+
+District:
+  $collections:
+    district_adverts_for_tavern:
+      $collect: Advert
+    district_characters_for_tavern:
+      $collect: Folk
+    district_rumors_for_tavern:
+      $collect: Rumor
+
+        #$reset: district_characters_for_tavern
+
+  $subclass:
+    - ResidentialDistrict
+    - PalaceDistrict
+    - CastleDistrict
+    - TempleDistrict
+    - CraftingDistrict
+    - HarborDistrict
+    - MarketDistrict
+      #- GuildsDistrict
+      #- ArcaneDistrict
+      #- GardenDistrict
+      #- CultureDistrict
+      #- CouncilDistrict
+  PeoplePerShopOrService:
+    #$diceroll: 15d6
+    $diceroll: 10d4+10
+  Population: !jinja "{{(shops | length)*PeoplePerShopOrService}}"
+
+  Index: !jinja >
+    [__{{Tavern.Name.Type}}__ ({{Tavern.Name.Full}})](#{{Tavern.uuid}}),
+    [__Guards__ ({{Guards | map(attribute='Name.First') | join(', ')}})](#{{uuid}}_guards),
+    {{ shops | map(attribute='InvertedName') | reject('undefined') | join(', ')}}
+
+  Handout: !jinja >
+    __{{Tavern.Name.Type}}__ ({{Tavern.Name.Full}}),
+    __Guards__ ({{Guards | map(attribute='Name.First') | join(', ')}}),
+    {{ shops | map(attribute='InvertedHandoutName') | reject('undefined') | join(', ')}}
+
+
+  Description: !jinja >
+
+    ##### Guards <a name='{{uuid}}_guards'></a>
+
+    {% set counter = namespace(value=0) %}
+    {% for g in Guards %}
+    {% set counter.value = counter.value + 1 %}
+
+    <a name="{{g.uuid}}"></a> __Guard #{{counter.value}}__
+
+
+    {{g.Description}}
+
+
+    ---
+
+
+    {{g.Stats}}
+
+
+    ---
+
+    {% endfor %}
+    
+    {% for s in shops %}
+
+    ##### {{s.Name}} <a name="{{s.Owner.uuid}}"></a>
+
+    {{s.Inventory}}
+
+    __{{s.OwnerTitle}}:__
+    {{s.Owner.Description}}
+    {{s.Quest.Description}}
+    {{s.HexQuest.Description if s.HexQuest}}
+
+    {% endfor %}
+
+  Guards:
+    $rollsome:
+      $class: Guard
+      $min: 1
+      $max: 3
+      $inject:
+        $values:
+          # Most guards are lawful, other are neutral
+          # but some will be chaotic (if set so by their
+          # membership to a cult for example).
+          Alignment: !weighted
+            - Lawful^5
+            - Neutral
+
+
+CityDistrict:
+  $subclass: !avoid_duplicates
+    - ResidentialDistrict1
+    - ResidentialDistrict2
+    - ResidentialDistrict3
+    - ResidentialDistrict4
+    - ResidentialDistrict5
+    - PalaceDistrict
+      #- CastleDistrict
+    - TempleDistrict
+    - CraftingDistrict
+    - HarborDistrict
+    - MarketDistrict
+
+
+VillageDistrict:
+  $extends: District
+
+  CostFactor: 0.9
+
+  $context:
+    $attr: DistrictContext
+    $values:
+      - CostFactor
+
+  shops:
+    $rollsome:
+      $class: TownShops
+      $min: 5
+      $max: 19
+
+  Tavern:
+    $roll: DistrictTavern
+
+
+TownDistrict:
+  $extends: District
+
+  CostFactor: 1.0
+
+  $context:
+    $attr: DistrictContext
+    $values:
+      - CostFactor
+
+  shops:
+    $rollsome:
+      $class: TownShops
+      $min: 12
+      $max: 34
+
+  Tavern:
+    $roll: DistrictTavern
+
+ResidentialDistrict1:
+  $subclass:
+    - ResidentialDistrict
+ResidentialDistrict2:
+  $subclass:
+    - ResidentialDistrict
+ResidentialDistrict3:
+  $subclass:
+    - ResidentialDistrict
+ResidentialDistrict4:
+  $subclass:
+    - ResidentialDistrict
+ResidentialDistrict5:
+  $subclass:
+    - ResidentialDistrict
+
+ResidentialDistrict:
+  Title: !jinja "{{TitlePrefix}} {{TitleNoun}} District"
+
+  TitleNoun:
+    - Peasants
+    - Townsfolk
+    - Common
+    - Commoners
+    - Dwellers
+    - Townsfolk
+    - Miners
+
+  TitlePrefix:
+    - Northside
+    - Southside
+    - Westside
+    - Eastside
+    - Upper
+    - Lower
+    - ""
+
+  CostFactor: 0.8
+
+  $context:
+    $attr: DistrictContext
+    $values:
+      - CostFactor
+
+
+  $extends: District
+
+  shops:
+    $rollsome:
+      $class: ResidentialDistrictShop
+      $min: 2
+      $max: 5
+
+  Tavern:
+    $roll: DistrictTavern
+
+
+PalaceDistrict:
+  $extends: District
+  Title: Palace District
+
+  CostFactor: 2.0
+
+  $context:
+    $attr: DistrictContext
+    $values:
+      - CostFactor
+
+  shops:
+    $rollsome:
+      $class: PalaceDistrictShop
+      $min: 2
+      $max: 5
+  Tavern:
+    $roll: DistrictTavern
+
+
+CastleDistrict:
+  $extends: District
+  Title: Castle District
+  shops:
+    $rollsome:
+      $class: CastleDistrictShop
+      $min: 2
+      $max: 5
+  Tavern:
+    $roll: DistrictTavern
+
+
+TempleDistrict:
+  $extends: District
+  Title: Temple District
+  CostFactor: 1.5
+
+  $context:
+    $attr: DistrictContext
+    $values:
+      - CostFactor
+  shops:
+    $rollsome:
+      $class: TempleDistrictShop
+      $min: 2
+      $max: 4
+  Tavern:
+    $roll: DistrictTavern
+
+
+CraftingDistrict:
+  $extends: District
+  Title: Crafting District
+  CostFactor: 1.0
+
+  $context:
+    $attr: DistrictContext
+    $values:
+      - CostFactor
+  shops:
+    $rollsome:
+      $class: CraftingDistrictShop
+      $min: 7
+      $max: 10
+  Tavern:
+    $roll: DistrictTavern
+
+
+HarborDistrict:
+  $extends: District
+  Title: Harbor District
+  CostFactor: 0.9
+
+  $context:
+    $attr: DistrictContext
+    $values:
+      - CostFactor
+  shops:
+    $rollsome:
+      $class: HarborDistrictShop
+      $min: 4
+      $max: 7
+  Tavern:
+    $roll: DistrictTavern
+
+
+MarketDistrict:
+  $extends: District
+  Title: Market District
+  CostFactor: 0.9
+
+  $context:
+    $attr: DistrictContext
+    $values:
+      - CostFactor
+  shops:
+    $rollsome:
+      $class: MarketDistrictShop
+      $min: 10
+      $max: 20
+  Tavern:
+    $roll: DistrictTavern
+
+
+ResidentialDistrictShop:
+  $subclass: !avoid_duplicates
+    - Bakery
+    - GeneralGoods
+    - Bookstore
+    - Grocer
+    - PetShop
+    - Herbalist
+    - Carpenter
+    - Stables
+    - Hatter
+    - Butchery
+    - Clothing
+    - Barber
+    - Liquor
+    - Craft
+    - Music
+    - Salon
+    - Spice
+    - Bathhouse
+    - AnimalSupplies
+    - Winery
+    - Brewery
+    - Distillery
+    - Flower
+    - Cobbler
+    - Tinkerer
+    - Weaver
+    - Scribe
+    - Veterinarian
+    - DarkMarket
+    - Bank
+    - Physician
+    - School
+    - Daycare
+    - IndoorMarket
+    - Nunnery
+    - Tailor
+    - Orphanage
+    - Restaurant
+
+
+PalaceDistrictShop:
+  $subclass: !avoid_duplicates
+    - Bookstore
+    - ExoticGoods
+    - Jeweler
+    - Stables
+    - ArmorWeapons
+    - Hatter
+    - Clothing
+    - Blacksmith
+    - Barber
+    - Liquor
+    - Music
+    - Salon
+    - Cartographer
+    - Bathhouse
+    - Casino
+    - Occult
+    - Winery
+    - Flower
+    - Scribe
+    - Bank
+    - Physician
+    - Barracks
+    - Museum
+    - Library
+    - Lawyer
+    - CityGuard
+    - EventHall
+    - Enchanter
+    - Theater
+    - EventPlanner
+    - Restaurant
+    - Registry
+    - TradePost
+    - Archive
+
+PalaceDistrictGuild:
+  $subclass:
+    - ArtistsGuild
+    - WritersGuild
+    - KnightsGuild
+
+
+TempleDistrictShop:
+  $subclass: !avoid_duplicates
+    - Bakery
+    - GeneralGoods
+    - Bookstore
+    - Herbalist
+    - ExoticGoods
+    - Jeweler
+    - Hatter
+    - Clothing
+    - Music
+    - Occult
+    - Winery
+    - Flower
+    - Scribe
+    - Bank
+    - Physician
+    - School
+    - Museum
+    - Library
+    - Enchanter
+    - Theater
+    - College
+    - Archive
+    - FortuneTeller
+    - Matchmaker
+
+TempleDistrictGuild:
+  $subclass:
+    - ArtistsGuild
+    - ScholarsGuild
+    - WritersGuild
+
+
+CraftingDistrictShop:
+  $subclass: !avoid_duplicates
+    - GeneralGoods
+    - Bookstore
+    - Herbalist
+    - ExoticGoods
+    - Jeweler
+    - Carpenter
+    - ArmorWeapons
+    - Hatter
+    - Clothing
+    - Blacksmith
+    - Liquor
+    - Craft
+    - Music
+    - Cartographer
+    - Spice
+    - Brewery
+    - Distillery
+    - Cobbler
+    - Tinkerer
+    - Weaver
+    - Scribe
+    - DarkMarket
+    - GlassBlower
+    - Leatherworker
+    - TinWorker
+    - IndoorMarket
+    - Tailor
+    - GameShop
+    - PrintingPress
+    - Tanner
+    - VehicleMaker
+
+
+CraftingDistrictGuild:
+  $subclass:
+    - WritersGuild
+
+
+HarborDistrictShop:
+  $subclass: !avoid_duplicates
+    - Bakery
+    - GeneralGoods
+    - Bookstore
+    - Grocer
+    - PetShop
+    - Herbalist
+    - ExoticGoods
+    - Jeweler
+    - Bunkhouse
+    - Carpenter
+    - Stables
+    - ArmorWeapons
+    - Hatter
+    - Butchery
+    - Clothing
+    - Blacksmith
+    - Barber
+    - Liquor
+    - Craft
+    - Music
+    - Salon
+    - Cartographer
+    - Spice
+    - Bathhouse
+    - Casino
+    - AnimalSupplies
+    - Winery
+    - Brewery
+    - Distillery
+    - Cobbler
+    - Tinkerer
+    - Weaver
+    - Scribe
+    - Veterinarian
+    - DarkMarket
+    - Brothel
+    - Bank
+    - GlassBlower
+    - Leatherworker
+    - Physician
+    - Lawyer
+    - TinWorker
+    - IndoorMarket
+    - Nightclub
+    - FishMarket
+    - Tailor
+    - PostOffice
+    - Mill
+    - Smokehouse
+    - GameShop
+    - PrintingPress
+    - AnimalPound
+    - Restaurant
+    - Tanner
+    - Registry
+    - TradePost
+    - VehicleMaker
+    - FortuneTeller
+
+HarborDistrictGuild:
+  $subclass:
+    - FishermenGuild
+    - MerchantsGuild
+    - AdventurersGuild
+    - BardsGuild
+    - SailorsGuild
+
+
+MarketDistrictShop:
+  $subclass: !avoid_duplicates
+    - Bakery
+    - GeneralGoods
+    - Bookstore
+    - Grocer
+    - PetShop
+    - Herbalist
+    - ExoticGoods
+    - Jeweler
+    - Carpenter
+    - Stables
+    - ArmorWeapons
+    - Hatter
+    - Butchery
+    - Clothing
+    - Blacksmith
+    - Barber
+    - Liquor
+    - Craft
+    - Music
+    - Salon
+    - Spice
+    - Bathhouse
+    - Casino
+    - AnimalSupplies
+    - Occult
+    - Winery
+    - Brewery
+    - Distillery
+    - Flower
+    - Cobbler
+    - Tinkerer
+    - Weaver
+    - Scribe
+    - Veterinarian
+    - DarkMarket
+    - Brothel
+    - Bank
+    - GlassBlower
+    - Leatherworker
+    - TinWorker
+    - IndoorMarket
+    - FishMarket
+    - Tailor
+    - PostOffice
+    - Mill
+    - Smokehouse
+    - GameShop
+    - PrintingPress
+    - AnimalPound
+    - Restaurant
+    - Tanner
+    - TradePost
+    - VehicleMaker
+
+MarketDistrictGuild:
+  $subclass:
+    - HuntersGuild
+    - ThievesGuild
+    - MerchantsGuild
+
+Folk:
+  $extends: Character
+  $context:
+    $attr: FolkContext
+    $values:
+      - Gender
+      - Name
+      - uuid
+  Story2:
+    $roll: Quest
+
+
+Shop:
+  OwnerTitle: Owner
+  Owner:
+    $roll:
+      $class: Folk
+      $inject:
+        $namespace: shop
+        $values:
+          Profession: !jinja >
+            {{shop.OwnerTitle | lower}} of the {{shop.Title | lower}} shop
+
+  Name: 
+    - !jinja "{{Owner.Name.First}}'s {{Noun}} (*{{Title}}*)"
+
+  InvertedName: 
+    - !jinja "[__{{Title}}__ ({{Owner.Name.First}}'s {{Noun}})](#{{Owner.uuid}})"
+
+  InvertedHandoutName: 
+    - !jinja "__{{Title}}__ ({{Owner.Name.First}}'s {{Noun}})"
+
+  Inventory: !jinja | 
+    {% if Items %}
+    Item | Price
+    ---- | -----{% for i in Items | unique(attribute='subclass_')%}
+    {{i.Title}} | {{((i.Cost|float) * PriceFactor * DistrictContext.CostFactor)|currency}}{% endfor %}
+
+    {% endif %}
+
+  PriceFactor:
+    - 0.8
+    - 0.9
+    - 1.0
+    - 1.1
+    - 1.2
+    - 1.4
+  $context:
+    $attr: ShopContext
+    $values:
+      - Owner
+
+  Quest:
+    $roll: ShopQuest
+
+Service:
+  OwnerTitle: Manager
+  Owner:
+    $roll:
+      $class: Folk
+      $inject:
+        $namespace: service
+        $values:
+          Profession: !jinja >
+            {{service.OwnerTitle | lower}} of the {{service.Title | lower}}
+
+  Name: 
+    - !jinja "*{{Title}}*"
+
+  InvertedName: 
+    - !jinja "[__{{Title}}__](#{{Owner.uuid}})"
+
+  InvertedHandoutName: 
+    - !jinja "__{{Title}}__"
+
+  Inventory: !jinja |
+    {% if Services %}
+    Service | Price
+    ---- | -----{% for i in Services %}
+    {{i.Title}} | {{i.Cost}}{% endfor %}
+
+    {% endif %}
+  $context:
+    $attr: ShopContext
+    $values:
+      - Owner
+
+  Quest:
+    $roll: ShopQuest
+
+Guild:
+  GuildHead:
+    $roll: Folk
+
+
+DistrictShop:
+  $subclass: !avoid_duplicates
+    - Bakery
+    - GeneralGoods
+    - Bookstore
+    - Grocer
+    - PetShop
+    - Herbalist
+    - ExoticGoods
+    - Jeweler
+    - Bunkhouse
+    - Carpenter
+    - Stables
+    - ArmorWeapons
+    - Hatter
+    - Butchery
+    - Clothing
+    - Blacksmith
+    - Barber
+    - Liquor
+    - Craft
+    - Music
+    - Salon
+    - Cartographer
+    - Spice
+    - Bathhouse
+    - Casino
+    - AnimalSupplies
+    - Occult
+    - Winery
+    - Brewery
+    - Distillery
+    - Flower
+    - Cobbler
+    - Tinkerer
+    - Weaver
+    - Scribe
+    - Veterinarian
+    - DarkMarket
+    - Brothel
+    - Bank
+    - GlassBlower
+    - Leatherworker
+    - Physician
+    - Barracks
+    - School
+    - Daycare
+    - Museum
+    - Library
+    - Lawyer
+    - TinWorker
+    - IndoorMarket
+    - Nightclub
+    - CityHall
+    - FishMarket
+    - Nunnery
+    - Tailor
+    - Prison
+    - CityGuard
+    - EventHall
+    - Orphanage
+    - Enchanter
+    - PostOffice
+    - Mill
+    - Smokehouse
+    - GameShop
+    - Theater
+    - Witch
+    - College
+    - PrintingPress
+    - AnimalPound
+    - EventPlanner
+    - Mortician
+    - Restaurant
+    - Tanner
+    - Registry
+    - TradePost
+    - VehicleMaker
+    - Archive
+    - FortuneTeller
+    - Matchmaker
+
+DistrictGuilds:
+  $subclass:
+    - ArtistsGuild
+    - HuntersGuild
+    - FishermenGuild
+    - ThievesGuild
+    - MerchantsGuild
+    - ScholarsGuild
+    - WritersGuild
+    - AdventurersGuild
+    - MagesGuild
+    - BardsGuild
+    - ArchitectsGuild
+    - SailorsGuild
+    - KnightsGuild
+
+
+TownShops:
+  $subclass: !avoid_duplicates
+    - Bakery
+    - GeneralGoods
+    - Bookstore
+    - Grocer
+    - PetShop
+    - Herbalist
+    - Jeweler
+    - Bunkhouse
+    - Carpenter
+    - Stables
+    - ArmorWeapons
+    - Hatter
+    - Butchery
+    - Clothing
+    - Blacksmith
+    - Barber
+    - Liquor
+    - Craft
+    - Music
+    - Salon
+    - Spice
+    - Bathhouse
+    - AnimalSupplies
+    - Brewery
+    - Distillery
+    - Flower
+    - Cobbler
+    - Tinkerer
+    - Weaver
+    - Veterinarian
+    - Brothel
+    - Bank
+    - GlassBlower
+    - Leatherworker
+    - Physician
+    - Barracks
+    - School
+    - Daycare
+    - Library
+    - Lawyer
+    - TinWorker
+    - FishMarket
+    - Nunnery
+    - Tailor
+    - Prison
+    - PostOffice
+    - Mill
+    - Smokehouse
+    - GameShop
+    - Witch
+    - PrintingPress
+    - AnimalPound
+    - Mortician
+    - Restaurant
+    - Tanner
+    - Registry
+    - TradePost
+    - VehicleMaker
+    - FortuneTeller
+    - Matchmaker
+
+
+TavernName:
+  Full:
+    - !jinja "The {{Creature}} & The {{LivingAdjective}} {{Title}} {{Type}}"
+    - !jinja "The {{LivingAdjective}} {{Creature}} {{Type}}"
+    - !jinja "{{StaticAdjective}} {{Object}} {{Type}}"
+    - !jinja "The {{StaticAdjective}} {{Object}} {{Type}}"
+    - !jinja "The {{Title}}'s {{Object}} {{Type}}"
+
+  Type:
+    - Tavern
+
+  Creature:
+    - Ghoul
+    - Mummy
+    - Skeleton
+    - Spectre
+    - Wight
+    - Wraith
+    - Zombie
+    - Werewolf
+    - Hawk
+    - Harpy
+    - Dragon
+    - Vampire
+    - Pixie
+    - Unicorn
+    - Orc
+    - Goblin
+    - Gnoll
+    - Ogre
+    - Troll
+
+  Title:
+    - Devil
+    - Queen
+    - King
+    - Knight
+    - Hunter
+    - Baker
+    - Brewer
+    - Wizard
+    - Bard
+    - Rogue
+    - Mage
+    - Witch
+    - Paladin
+    - Peasant
+
+  Object:
+    - Sword
+    - Mace
+    - Stone
+    - Torch
+    - Arrow
+    - Spear
+    - Staff
+
+  LivingAdjective:
+    - Bleeding
+    - Fearless
+    - Gloomy
+    - Sad
+    - Crying
+    - Laughing
+    - Cursed
+
+  StaticAdjective:
+    - Flaming
+    - Glowing
+    - Magic
+    - Black
+    - Cursed
+    - Lost
+
+
+InnName:
+  $extends: TavernName
+  Type:
+    - Inn
+    - Lodge
+

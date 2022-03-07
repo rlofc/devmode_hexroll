@@ -1,0 +1,236 @@
+CaveEncounterTier1:
+  $subclass:
+    - DungeonEncounterHumanoidsTier1
+    - DungeonEncounterVerminsTier1
+    - DungeonEncounterOozesTier1
+    - DungeonEncounterAbberationsTier1
+
+
+CaveEncounterTier2:
+  $subclass:
+    - DungeonEncounterVerminsTier2
+    - DungeonEncounterOozesTier2
+    - DungeonEncounterAbberationsTier2
+
+
+CaveEncounterTier3:
+  $subclass:
+    - DungeonEncounterVerminsTier3
+    - DungeonEncounterOozesTier3
+    - DungeonEncounterAbberationsTier3
+    - DungeonEncounterDragonsTier3
+
+
+CaveFeatureTier1:
+  $subclass: !weighted
+    - CaveEncounterTier1^3
+    - DungeonTreasureTier1
+    - DungeonRemains
+    - DungeonFungi
+
+
+CaveFeatureTier2:
+  $subclass: !weighted
+    - CaveEncounterTier2^2
+    - DungeonTreasureTier2
+    - DungeonRemains
+    - DungeonFungi
+
+
+CaveFeatureTier3:
+  $subclass: !weighted
+    - CaveEncounterTier3^2
+    - DungeonTreasureTier3
+    - DungeonRemains
+    - DungeonFungi
+
+
+Cavern:
+  $extends: Dungeon
+
+  Name:
+    $roll: CavernName
+
+  $context:
+    $attr: DungeonContext
+    $values:
+      - Name
+      - Hex
+      - HexUUID
+
+  $collections:
+    dungeon_encounters:
+      $collect: Monster
+    dungeon_captives:
+      $collect: MissingPersonQuestCell
+    dungeon_treasure:
+      $collect: TreasureType
+    dungeon_quest_treasures:
+      $collect: QuestTreasureHiding
+
+  Map:
+    $roll: 
+      $class: !parameter cave_maps
+      $bootstrap:
+        DungeonFeatureTier1: CaveFeatureTier1
+        DungeonFeatureTier2: CaveFeatureTier2
+        DungeonFeatureTier3: CaveFeatureTier3
+        DungeonFeatureTier4: CaveFeatureTier3
+  WanderingMonsters:
+    $roll: DungeonWanderingMonsters
+
+
+TombFeatureTier1:
+  $subclass: !weighted
+    - DungeonEncounterVerminsTier1^3
+    - DungeonTreasureTier1
+    - DungeonRemains
+    - DungeonFungi
+
+
+TombFeatureTier2:
+  $subclass: !weighted
+    - DungeonEncounterUndead^2
+    - DungeonTreasureTier2
+    - DungeonRemains
+    - DungeonFungi
+
+
+TombFeatureTier3:
+  $subclass: !weighted
+    - DungeonEncounterUndeadTier3^2
+    - DungeonTreasureTier3
+    - DungeonRemains
+    - DungeonFungi
+
+
+TombFeatureTier4:
+  $subclass: !weighted
+    - DungeonEncounterUndeadTier4^10
+    - DungeonTreasureTier4
+
+
+Tomb:
+  $extends: Dungeon
+
+  #  - The Tomb of Blackness
+  #  - The Tomb of Lost Souls
+  #  - The Tomb of Nak'Hatop
+  #  - The Tomb of Betraying Spider
+  #  - The Tomb of the Grey Lich
+  #  - The Tomb of Corrupted Desires
+  Name:
+    $roll: TombName
+
+  $context:
+    $attr: DungeonContext
+    $values: 
+      - Name
+      - Hex
+      - HexUUID
+
+  $collections:
+    dungeon_encounters:
+      $collect: Monster
+    dungeon_captives:
+      $collect: MissingPersonQuestCell
+    dungeon_treasure:
+      $collect: TreasureType
+    dungeon_quest_treasures:
+      $collect: QuestTreasureHiding
+
+  Map:
+    $roll: 
+      $class: !parameter tomb_maps
+      $bootstrap:
+        DungeonFeatureTier1: TombFeatureTier1
+        DungeonFeatureTier2: TombFeatureTier2
+        DungeonFeatureTier3: TombFeatureTier3
+        DungeonFeatureTier4: TombFeatureTier4
+  WanderingMonsters:
+    $roll: DungeonWanderingMonsters
+
+
+TempleEncounterTier1:
+  $subclass:
+    - DungeonEncounterCultists
+    - DungeonEncounterTempleAnimals
+
+
+TempleEncounterTier2:
+  $subclass:
+    - DungeonEncounterMagicalTier2
+
+
+TempleEncounterTier3:
+  $subclass:
+    - DungeonEncounterMagicalTier3
+
+
+TempleEncounterTier4:
+  $subclass: !weighted
+    - DungeonEncounterDragonsTier3^3
+    - DungeonEncounterDragonsTier4
+
+
+TempleFeatureTier1:
+  $subclass: !weighted
+    - TempleEncounterTier1^3
+    - DungeonTreasureTier1
+    - DungeonRemains
+
+
+TempleFeatureTier2:
+  $subclass: !weighted
+    - TempleEncounterTier2^2
+    - DungeonTreasureTier2
+    - DungeonRemains
+
+
+TempleFeatureTier3:
+  $subclass: !weighted
+    - TempleEncounterTier3^2
+    - DungeonTreasureTier3
+    - DungeonRemains
+
+
+TempleFeatureTier4:
+  $subclass: !weighted
+    - TempleEncounterTier4^10
+    - DungeonTreasureTier4
+
+
+Temple:
+  $extends: Dungeon
+
+  Name:
+    $roll: TempleName
+
+  $context:
+    $attr: DungeonContext
+    $values:
+      - Name
+      - Hex
+      - HexUUID
+
+  $collections:
+    dungeon_encounters:
+      $collect: Monster
+    dungeon_captives:
+      $collect: MissingPersonQuestCell
+    dungeon_treasure:
+      $collect: TreasureType
+    dungeon_quest_treasures:
+      $collect: QuestTreasureHiding
+
+
+  Map:
+    $roll: 
+      $class: !parameter temple_maps
+      $bootstrap:
+        DungeonFeatureTier1: TempleFeatureTier1
+        DungeonFeatureTier2: TempleFeatureTier2
+        DungeonFeatureTier3: TempleFeatureTier3
+        DungeonFeatureTier4: TempleFeatureTier4
+  WanderingMonsters:
+    $roll: DungeonWanderingMonsters

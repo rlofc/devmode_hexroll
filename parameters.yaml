@@ -1,0 +1,81 @@
+defaults:
+  minimum_number_of_regions: 8
+  maximum_number_of_regions: 12 
+
+  minimum_tiles_per_mountains_region: 4
+  maximum_tiles_per_mountains_region: 8
+
+  minimum_tiles_per_plains_region: 4
+  maximum_tiles_per_plains_region: 8
+
+  minimum_tiles_per_forest_region: 4
+  maximum_tiles_per_forest_region: 8
+
+  minimum_tiles_per_desert_region: 4
+  maximum_tiles_per_desert_region: 8
+
+  minimum_tiles_per_coast_region: 4
+  maximum_tiles_per_coast_region: 8
+
+  minimum_number_of_dungeons: 9
+  maximum_number_of_dungeons: 13
+
+  minimum_number_of_settlements: 6
+  maximum_number_of_settlements: 9
+
+  minimum_number_of_inns: 2
+  maximum_number_of_inns: 3
+
+  minimum_number_of_factions: 3
+  maximum_number_of_factions: 5
+
+  minimum_number_of_wilderness_encounters: 9
+  maximum_number_of_wilderness_encounters: 12
+
+  region_classes: !weighted
+    - MountainsRegion^3
+    - PlainsRegion^3
+    - ForestRegion^3
+    - DesertRegion^3
+    - CoastRegion^2
+
+  settlement_classes: !weighted
+    - Village^3
+    - Town^3
+    - City^2
+    # - Hut
+    
+  dungeon_classes: !weighted
+    - Cavern
+    - Temple
+    - Tomb
+
+  tomb_maps: !weighted
+    - TombMapSmall^3
+    - TombMapMedium^3
+    - TombMapLarge^2
+
+  temple_maps: !weighted
+    - TempleMapSmall^3
+    - TempleMapMedium^3
+    - TempleMapLarge^2
+
+  cave_maps: !weighted
+    - CaveMapSmall^2
+    - CaveMapMedium
+
+  highest_wandering_monster_hitdice_in_dungeons: 3
+
+  generate_dungeon_conspectus: true
+
+  faction_classes: !weighted
+    - Cult
+    - Militia
+    #- Coven
+    #- Smugglers
+    #- Thieves
+    #- Tribe
+
+  unpack_similar_biomes_in_hex_map: false
+
+  accentuate_hex_map_colors: false
